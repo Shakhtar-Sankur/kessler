@@ -22,7 +22,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES's 100 closest conjunctions reproduced (median 0.24 m) | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
 | M4: Starlink maneuvers vs FCC reports: public data shows about half as many orbit changes as reported avoidance maneuvers, and ties maneuvers to predicted conjunctions only weakly (1.3–1.5×) | done |
-| M5: daily screening on GitHub Actions, public 3D page, archive of operator orbits | built, starting |
+| M5: daily screening on GitHub Actions, public 3D page, archive of operator orbits | running daily since 2026-10-10 |
 
 ## M0: the propagator matches the reference
 
@@ -173,7 +173,7 @@ Together with the count above (the public catalogue shows about half as many orb
 
 **Page: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)** — a 3D globe of every tracked object, the day's closest approaches (select one to see both orbits around closest approach), running statistics and the audit's results.
 
-* **Daily screening** ([`.github/workflows/daily.yml`](.github/workflows/daily.yml), [`kessler/daily.py`](kessler/daily.py)): every morning (05:41 UTC) a GitHub Actions runner builds kessler, downloads Space-Track's full catalogue (objects with elements from the last 10 days), screens every pair for the next 24 hours on its CPU (about 2 minutes for the 16,695 active satellites on 4 cores), computes the worst-case probability of the 50 closest approaches, keeps the day's derived results in [`daily/`](daily) and deploys the page. Element sets are never published: the page gets counts, closest approaches and object positions only.
+* **Daily screening** ([`.github/workflows/daily.yml`](.github/workflows/daily.yml), [`kessler/daily.py`](kessler/daily.py)): every morning (05:41 UTC) a GitHub Actions runner builds kessler, downloads Space-Track's full catalogue (objects with elements from the last 10 days), screens every pair for the next 24 hours on its CPU (the first run, on 10 October 2026: **32,066 objects, debris included, in 4 minutes** on GitHub's free 4-core runner; 80,278 approaches under 5 km, 2,810 under 1 km, 139 under 200 m), computes the worst-case probability of the 50 closest approaches, keeps the day's derived results in [`daily/`](daily) and deploys the page. Element sets are never published: the page gets counts, closest approaches and object positions only.
 * **Archive of operator orbits** ([`.github/workflows/archive.yml`](.github/workflows/archive.yml), [`kessler/archive.py`](kessler/archive.py)): every 6 hours it stores each new version of CelesTrak's supplemental element sets, which are fitted to the operators' own ephemerides (SpaceX for Starlink) and are far more precise than the public catalogue, plus SOCRATES's 2,000 closest conjunctions. CelesTrak serves only the current versions; this history is what M4's audit needs to be repeated with operator-quality orbits. It goes to a private repository, since kessler does not redistribute source data.
 * **Tests on every push** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
