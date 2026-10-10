@@ -13,8 +13,8 @@ cuda: $(CUDA_LIB)
 $(CUDA_LIB): src/cuda.cu include/kessler/sgp4.hpp
 	$(NVCC) -O3 -std=c++17 -Xcompiler -fPIC -shared -Iinclude --fmad=false $(CUDA_ARCH) src/cuda.cu -o $@
 
-$(LIB): src/capi.cpp include/kessler/sgp4.hpp
-	$(CXX) $(CXXFLAGS) -Iinclude -shared src/capi.cpp -o $@
+$(LIB): src/capi.cpp src/screen.cpp include/kessler/sgp4.hpp include/kessler/screen.hpp
+	$(CXX) $(CXXFLAGS) -Iinclude -shared src/capi.cpp src/screen.cpp -o $@
 
 clean:
 	rm -f $(LIB) $(CUDA_LIB)
