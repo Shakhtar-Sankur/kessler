@@ -21,7 +21,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
 | M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES's 100 closest conjunctions reproduced (median 0.24 m) | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
-| M4: Starlink maneuver detection vs FCC reports: public data shows about half as many orbit changes as the reported avoidance maneuvers; attributing them to conjunctions next | in progress |
+| M4: Starlink maneuvers vs FCC reports: public data shows about half as many orbit changes as reported avoidance maneuvers, and ties maneuvers to predicted conjunctions only weakly (1.3–1.5×) | done |
 | M5: daily pipeline and public page | planned |
 
 ## M0: the propagator matches the reference
@@ -139,7 +139,35 @@ CARA's own quadrature (64-point Gauss–Chebyshev) is accurate to about 1e-8, so
 
 **The public catalogue shows only about half as many orbit changes as SpaceX reports collision-avoidance maneuvers**, even though the changes it does show also include station-keeping and every other reason to thrust. So at least roughly 45% of the reported avoidance maneuvers leave no visible step in public orbit data: either they change the orbit by less than 50 m, or the avoidance and the return to the planned orbit both happen between two public updates. Public data alone cannot count Starlink's avoidance maneuvers; it can only bound them.
 
-The comparison is approximate. Satellites launched or retired during the period also maneuvered and are not in the sample, and the FCC figure covers the whole fleet. Next: for each detected maneuver, screen the satellite against the catalogue as it stood just before, to see which maneuvers followed a predicted close approach.
+The comparison is approximate. Satellites launched or retired during the period also maneuvered and are not in the sample, and the FCC figure covers the whole fleet.
+
+### Do the maneuvers follow predicted close approaches?
+
+If Starlink's maneuvers are collision avoidance, satellites that maneuver should more often have had a close approach coming. [`bench/m4_attribution.py`](bench/m4_attribution.py) tests this on six days spread over the FCC period (the 15th of each month). For each day it rebuilds the public catalogue as it stood at midnight from Space-Track's history (about 18,000 objects whose orbits reach the Starlink shells), screens it for the next 48 hours on the GPU, and compares the Starlink satellites in a stable shell that **maneuvered that day (2,082)** with those that **did not maneuver from the day before to two days after (40,832)**.
+
+Predicted approach within 48 h to a **non-Starlink object** (debris, rocket bodies, other operators; SpaceX coordinates Starlink-Starlink passes internally), with 95% intervals:
+
+| Closer than | Maneuvered | Did not maneuver | Ratio |
+|---|---|---|---|
+| 0.5 km | 3.3% [2.6–4.2] | 2.2% [2.0–2.3] | **1.53×** |
+| 1 km | 11.1% [9.8–12.5] | 8.6% [8.3–8.8] | **1.30×** |
+| 2 km | 35.0% [32.9–37.0] | 29.3% [28.8–29.7] | 1.19× |
+| 5 km | 87.7% [86.2–89.0] | 81.9% [81.6–82.3] | 1.07× |
+
+Re-running each predicted approach under 1 km with the satellite's next element set:
+
+| | Approaches | Median change in predicted distance | Moved away by more than 5 km |
+|---|---|---|---|
+| After a maneuver | 116 | **+8.3 km** | 72 (62%) |
+| After a routine update, no maneuver | 2,968 | +3.2 km | 1,191 (40%) |
+
+Three findings:
+
+1. **There is a real signal.** Satellites that maneuvered were 1.3 to 1.5 times as likely to have a predicted approach under 1 km to a non-Starlink object, and the intervals do not overlap. A maneuver moves such an approach away 2.6 times as far as a routine update does.
+2. **It is small.** The excess is 2.5 percentage points at 1 km and about 6 at 2 to 5 km: the public catalogue points to a close approach for only a few percent of the maneuvers beyond what any satellite sees on any day.
+3. **Public predictions are too coarse to do better.** With no maneuver at all, one routine update moves a predicted approach by a median 3.2 km to a non-Starlink object and 12.6 km to anything (mostly other Starlinks), far more than the distances that matter. SpaceX decides from its own precise ephemerides against a probability threshold of 3 in 10 million, which public element sets cannot reproduce.
+
+Together with the count above (the public catalogue shows about half as many orbit changes as SpaceX reports avoidance maneuvers), the conclusion is that **Starlink's collision-avoidance figures cannot be independently verified from public orbit data today**: most maneuvers leave no visible trace, and those that do can only rarely be tied to a conjunction anyone outside SpaceX can predict. A caveat: satellites that maneuver might also fly where traffic is denser, which this comparison does not yet control for.
 
 ## Limits
 
