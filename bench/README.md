@@ -32,3 +32,13 @@ closest conjunctions, using the very element sets SOCRATES used:
 !python bench/m2_socrates.py --n 100 --out bench/results/m2_socrates.json
 ```
 
+## M4: Starlink maneuvers vs SpaceX's FCC report
+
+Needs the Space-Track secrets. Samples 500 Starlink satellites and 300 debris objects (the false
+alarm control), fetches six months of element-set history (December 2025 – May 2026) and runs
+the maneuver detector. About 10 minutes, mostly waiting politely on Space-Track:
+
+```
+!python bench/m4_maneuvers.py --out bench/results/m4_maneuvers.json
+```
+

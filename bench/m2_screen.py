@@ -35,26 +35,15 @@ def gpu_name():
 
 def spacetrack_csv():
     """Every on-orbit object with elements from the last 30 days, from Space-Track."""
-    import http.cookiejar
-    import urllib.parse
-    import urllib.request
-    user, pw = os.environ.get("SPACETRACK_USER"), os.environ.get("SPACETRACK_PASS")
-    if not user:
-        try:
-            from kaggle_secrets import UserSecretsClient
-            sc = UserSecretsClient()
-            user, pw = sc.get_secret("SPACETRACK_USER"), sc.get_secret("SPACETRACK_PASS")
-        except Exception:
-            pass
-    if not user or not pw:
-        raise SystemExit("set SPACETRACK_USER and SPACETRACK_PASS (or Kaggle secrets of those names)")
-    jar = http.cookiejar.CookieJar()
-    op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-    op.open("https://www.space-track.org/ajaxauth/login",
-            urllib.parse.urlencode({"identity": user, "password": pw}).encode(), timeout=60).read()
-    q = ("https://www.space-track.org/basicspacedata/query/class/gp/decay_date/null-val/"
-         "epoch/%3Enow-30/orderby/norad_cat_id/format/csv")
-    return op.open(q, timeout=300).read().decode()
+    import csv
+    import io
+    from kessler.spacetrack import Client
+    rows = Client().query("class/gp/decay_date/null-val/epoch/%3Enow-30/orderby/norad_cat_id")
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=list(rows[0]))
+    w.writeheader()
+    w.writerows(rows)
+    return buf.getvalue()
 
 
 def summarize(ev, cat, idx, start_iso, top=15):

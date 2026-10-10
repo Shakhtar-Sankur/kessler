@@ -21,7 +21,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
 | M2: all-vs-all screening (CPU done and proven against brute force; GPU awaiting its T4 run) | in progress |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
-| M4: Starlink maneuver detection vs FCC reports | planned |
+| M4: Starlink maneuver detection vs FCC reports (detector tested on synthetic histories; real run needs Space-Track) | in progress |
 | M5: daily pipeline and public page | planned |
 
 ## M0: the propagator matches the reference
