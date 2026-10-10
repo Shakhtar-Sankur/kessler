@@ -22,3 +22,13 @@ For the full public catalogue (debris included), add Kaggle secrets `SPACETRACK_
 ```
 
 Send back the printed JSON (or `bench/results/m1_t4.json`).
+
+## Reproduce CelesTrak SOCRATES
+
+Needs CelesTrak to be reachable (it is from Kaggle). Compares kessler with SOCRATES's 100
+closest conjunctions, using the very element sets SOCRATES used:
+
+```
+!python bench/m2_socrates.py --n 100 --out bench/results/m2_socrates.json
+```
+

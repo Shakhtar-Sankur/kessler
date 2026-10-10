@@ -148,3 +148,32 @@ def pc2d_from_cdm(text, hbr=None, adjust=True):
     r1, v1, c1 = cdm_states(objs[0])
     r2, v2, c2 = cdm_states(objs[1])
     return pc2d(r1, v1, c1, r2, v2, c2, hbr if hbr is not None else head["HBR"], adjust)
+
+
+def max_pc(r1, v1, r2, v2, hbr, sigma_rtn=(100.0, 300.0, 100.0)):
+    """Maximum probability of collision when the covariance is unknown (Alfano, 2005), as
+    CelesTrak's SOCRATES reports it: each object's position uncertainty has the shape
+    diag(sigma_rtn^2) in its own radial / along-track / cross-track frame, and one common
+    scale factor k is chosen to make the probability largest. Units: m, m/s.
+
+    Returns (max probability, k at the maximum). Below the hard-body radius the objects
+    overlap at closest approach and the probability is 1."""
+    r1, v1, r2, v2 = (np.asarray(a, dtype=float) for a in (r1, v1, r2, v2))
+    r1, r2, _ = linear_closest_approach(r1, v1, r2, v2)
+    if np.linalg.norm(r1 - r2) <= hbr:
+        return 1.0, 0.0
+    base = np.diag(np.square(sigma_rtn))
+    c1, c2 = rtn_to_inertial(base, r1, v1), rtn_to_inertial(base, r2, v2)
+    rm, l1, l2, xm, zm = encounter_plane(r1, v1, c1, r2, v2, c2)
+
+    def neg_log_pc(logk):
+        k2 = math.exp(2.0 * logk)
+        p = pc_circle(xm, zm, math.sqrt(l1 * k2), math.sqrt(l2 * k2), hbr, rel_tol=1e-10)
+        return -math.log(p) if p > 0.0 else 1e300
+
+    # the probability is unimodal in the scale; bracket generously around miss / sigma
+    k0 = rm / math.sqrt(l1)
+    res = __import__("scipy.optimize", fromlist=["minimize_scalar"]).minimize_scalar(
+        neg_log_pc, bounds=(math.log(k0) - 12.0, math.log(k0) + 6.0), method="bounded",
+        options={"xatol": 1e-10})
+    return math.exp(-res.fun), math.exp(res.x)

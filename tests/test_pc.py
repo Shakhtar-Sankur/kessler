@@ -43,3 +43,14 @@ def test_pc2d_matches_cara():
           f"{(rels < 1e-8).sum()} within 1e-8, {(rels < 1e-12).sum()} within 1e-12")
     assert len(rels) == 106
     assert rels.max() < 1e-7
+
+
+def test_max_pc_isotropic_closed_form():
+    """For a round covariance and a small object, Pc ~ R^2/(2 s^2) exp(-d^2/(2 s^2)); its
+    maximum over s is R^2 / (e d^2) (Alfano, 2005)."""
+    import math
+    from kessler.pc import max_pc
+    r1, v1 = np.array([7000e3, 0.0, 0.0]), np.array([0.0, 7.5e3, 0.0])
+    r2, v2 = np.array([7000e3, 0.0, 1000.0]), np.array([0.0, -7.5e3, 0.0])   # head-on, 1 km miss
+    p, _ = max_pc(r1, v1, r2, v2, 5.0, sigma_rtn=(100.0, 100.0, 100.0))
+    assert abs(p / (25.0 / (math.e * 1e6)) - 1.0) < 1e-4
