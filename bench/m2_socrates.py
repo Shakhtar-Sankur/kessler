@@ -59,20 +59,32 @@ def days_since_1949(dt):
     return (dt - datetime(1949, 12, 31)).total_seconds() / 86400.0
 
 
+ELEMENTS = ("EPOCH", "MEAN_MOTION", "ECCENTRICITY", "INCLINATION", "RA_OF_ASC_NODE", "ARG_OF_PERICENTER",
+            "MEAN_ANOMALY", "BSTAR")
+
+
 def matching(rows, tca_days, dse):
+    """The element set whose days-from-epoch is closest to SOCRATES's DSE (within 0.001 day, the
+    precision SOCRATES publishes), and how many distinct element sets were within it."""
+    hits = {}
     for row in rows:
-        if "EPOCH" in row and abs((tca_days - epoch_days(row["EPOCH"])) - dse) < 1e-3:
-            return row
-    return None
+        if "EPOCH" in row:
+            diff = abs((tca_days - epoch_days(row["EPOCH"])) - dse)
+            if diff < 1e-3:
+                hits.setdefault(tuple(row.get(k) for k in ELEMENTS), (diff, row))
+    if not hits:
+        return None, 0
+    return min(hits.values(), key=lambda x: x[0])[1], len(hits)
 
 
 def element_sets(norad, tca_days, dse, cache):
-    """The element set SOCRATES used for this object, or None: CelesTrak GP, CelesTrak SupGP, then
-    (if credentials are set) Space-Track's history, which keeps superseded element sets."""
+    """The element set SOCRATES used for this object, its source and the number of candidates:
+    Space-Track's history (if credentials are set; it keeps superseded element sets), then
+    CelesTrak GP and SupGP."""
     if ("history", norad) in cache:
-        row = matching(cache[("history", norad)], tca_days, dse)
+        row, n = matching(cache[("history", norad)], tca_days, dse)
         if row is not None:
-            return row, "space-track gp_history"
+            return row, "space-track gp_history", n
     for kind, url in (("gp", GP), ("supgp", SUPGP)):
         key = (kind, norad)
         if key not in cache:
@@ -81,10 +93,10 @@ def element_sets(norad, tca_days, dse, cache):
             except Exception:
                 rows = []
             cache[key] = rows
-        row = matching(cache[key], tca_days, dse)
+        row, n = matching(cache[key], tca_days, dse)
         if row is not None:
-            return row, kind
-    return None, None
+            return row, kind, n
+    return None, None, 0
 
 
 def fetch_history(soc, cache):
@@ -115,6 +127,18 @@ def _fetch_history(soc, cache):
     for norad, rows in by.items():
         cache[("history", norad)] = rows
     print(f"Space-Track history: {sum(len(v) for v in by.values())} element sets for {len(by)} objects")
+    # radar cross-section class (SMALL < 0.1 m2 < MEDIUM < 1 m2 < LARGE), to see what SOCRATES's
+    # hard-body radius depends on
+    try:
+        part = ",".join(str(x) for x in sorted(ids))
+        for r in st.query(f"class/satcat/NORAD_CAT_ID/{part}"):
+            cache[("rcs", int(r["NORAD_CAT_ID"]))] = r.get("RCS_SIZE") or "unknown"
+    except Exception as e:
+        print(f"Space-Track satcat not used ({type(e).__name__}: {e})")
+
+
+def size_class(name, norad, cache):
+    return "STARLINK" if "STARLINK" in name.upper() else cache.get(("rcs", norad), "unknown")
 
 
 def main():
@@ -130,9 +154,12 @@ def main():
     for c in soc:
         tca = parse_time(c["TCA"])
         tca_days = days_since_1949(tca)
-        o1, k1 = element_sets(int(c["NORAD_CAT_ID_1"]), tca_days, float(c["DSE_1"]), cache)
-        o2, k2 = element_sets(int(c["NORAD_CAT_ID_2"]), tca_days, float(c["DSE_2"]), cache)
+        n1, n2 = int(c["NORAD_CAT_ID_1"]), int(c["NORAD_CAT_ID_2"])
+        o1, k1, c1 = element_sets(n1, tca_days, float(c["DSE_1"]), cache)
+        o2, k2, c2 = element_sets(n2, tca_days, float(c["DSE_2"]), cache)
         row = {"a": c["OBJECT_NAME_1"], "b": c["OBJECT_NAME_2"], "tca": c["TCA"],
+               "pair": " + ".join(sorted([size_class(c["OBJECT_NAME_1"], n1, cache),
+                                          size_class(c["OBJECT_NAME_2"], n2, cache)])),
                "socrates_range_km": float(c["TCA_RANGE"]), "socrates_speed_km_s": float(c["TCA_RELATIVE_SPEED"]),
                "socrates_max_prob": float(c["MAX_PROB"]), "socrates_dilution_km": float(c["DILUTION"])}
         if o1 is None or o2 is None:
@@ -140,6 +167,9 @@ def main():
             rows.append(row)
             continue
         row["elements"] = [k1, k2]
+        # more than one element set within SOCRATES's 0.001-day precision: which one it used is
+        # uncertain, so these comparisons are reported apart
+        row["ambiguous"] = c1 > 1 or c2 > 1
         cat = Catalog([o1, o2])
         els = Elsets(cat.mean)
         start = tca_days - 300.0 / 86400.0
@@ -171,7 +201,8 @@ def main():
         rows.append(row)
         print(f"{row['a'][:24]:>24} x {row['b'][:24]:<24} range {row['socrates_range_km']*1e3:8.1f} m  "
               f"dTCA {row['tca_diff_ms']:8.3f} ms  drange {row['range_diff_m']:8.3f} m  "
-              f"SOCRATES maxP {sp:.3e}  implied HBR {row.get('implied_hbr_m', float('nan')):.2f} m")
+              f"SOCRATES maxP {sp:.3e}  implied HBR {row.get('implied_hbr_m', float('nan')):.2f} m  "
+              f"{row['pair']}{'  (ambiguous element set)' if row['ambiguous'] else ''}")
 
     done = [r for r in rows if r["status"] == "compared"]
     sources = {}
@@ -180,14 +211,28 @@ def main():
             sources[k] = sources.get(k, 0) + 1
     summary = {"socrates_rows": len(soc), "compared": len(done), "element_set_sources": sources,
                "skipped": {s: sum(r["status"] == s for r in rows) for s in {r["status"] for r in rows} - {"compared"}}}
+    def stats(rs):
+        if not rs:
+            return {}
+        return {"n": len(rs),
+                "max_abs_tca_diff_ms": max(abs(r["tca_diff_ms"]) for r in rs),
+                "max_abs_range_diff_m": max(abs(r["range_diff_m"]) for r in rs),
+                "median_abs_range_diff_m": float(np.median([abs(r["range_diff_m"]) for r in rs])),
+                "range_within_0.5m": sum(abs(r["range_diff_m"]) <= 0.5 for r in rs),
+                "max_abs_speed_diff_m_s": max(abs(r["kessler_speed_km_s"] - r["socrates_speed_km_s"]) * 1e3
+                                              for r in rs)}
+
     if done:
-        summary.update(
-            max_abs_tca_diff_ms=max(abs(r["tca_diff_ms"]) for r in done),
-            max_abs_range_diff_m=max(abs(r["range_diff_m"]) for r in done),
-            median_abs_range_diff_m=float(np.median([abs(r["range_diff_m"]) for r in done])),
-            max_abs_speed_diff_m_s=max(abs(r["kessler_speed_km_s"] - r["socrates_speed_km_s"]) * 1e3 for r in done),
-            implied_hbr_m=sorted(round(r["implied_hbr_m"], 3) for r in done if "implied_hbr_m" in r),
-        )
+        summary.update(stats(done))
+        summary["unambiguous"] = stats([r for r in done if not r["ambiguous"]])
+        summary["ambiguous"] = stats([r for r in done if r["ambiguous"]])
+        by_pair = {}
+        for r in done:
+            if "implied_hbr_m" in r:
+                by_pair.setdefault(r["pair"], []).append(r["implied_hbr_m"])
+        summary["implied_hbr_m_by_pair"] = {
+            k: {"n": len(v), "median": round(float(np.median(v)), 2), "min": round(min(v), 2), "max": round(max(v), 2)}
+            for k, v in sorted(by_pair.items())}
     print(json.dumps(summary, indent=2))
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     with open(a.out, "w") as f:

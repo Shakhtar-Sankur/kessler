@@ -19,9 +19,9 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 |---|---|
 | M0: SGP4 (CPU), validated against the reference | done |
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
-| M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES reproduced to 0.45 m | done |
+| M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES's 100 closest conjunctions reproduced (median 0.24 m) | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
-| M4: Starlink maneuver detection vs FCC reports (detector tested on synthetic histories; real run needs Space-Track) | in progress |
+| M4: Starlink maneuver detection vs FCC reports: public data shows about half as many orbit changes as the reported avoidance maneuvers; attributing them to conjunctions next | in progress |
 | M5: daily pipeline and public page | planned |
 
 ## M0: the propagator matches the reference
@@ -98,15 +98,17 @@ Adding the debris and inactive objects that the active catalogue lacks brings 20
 
 ### Reproducing SOCRATES
 
-[CelesTrak's SOCRATES](https://celestrak.org/SOCRATES/) has screened active satellites against the public catalogue since 2004, with commercial software (STK/CAT). [`bench/m2_socrates.py`](bench/m2_socrates.py) takes its 100 closest conjunctions, recovers the exact element sets SOCRATES used (each object's days-from-epoch must match SOCRATES's to 0.001 day) and computes the same approaches with kessler. On the 24 for which those element sets were still available (CelesTrak had replaced the others since SOCRATES's run; the script now also looks them up in Space-Track's history):
+[CelesTrak's SOCRATES](https://celestrak.org/SOCRATES/) has screened active satellites against the public catalogue since 2004, with commercial software (STK/CAT). [`bench/m2_socrates.py`](bench/m2_socrates.py) takes its 100 closest conjunctions, recovers the exact element sets SOCRATES used from Space-Track's history (each object's days-from-epoch must match SOCRATES's to 0.001 day, the precision it publishes) and computes the same approaches with kessler. **All 100 were recovered and compared:**
 
 | | Largest difference from SOCRATES | Median |
 |---|---|---|
-| Distance at closest approach | 0.45 m | 0.30 m |
+| Distance at closest approach | 4.2 m (one pair; the next largest are under 0.5 m) | 0.24 m |
 | Time of closest approach | 15.5 ms | |
-| Relative speed | 0.45 m/s | |
+| Relative speed | 0.49 m/s | |
 
-SOCRATES does not publish the hard-body radius behind its "maximum probability" (Alfano's method with a 100 × 300 × 100 m covariance shape, scaled to the worst case). Solving for the radius that reproduces each of its 24 values gives **5.7 to 7.0 m**, the same narrow range for every conjunction.
+SOCRATES rounds distances to the metre, so differences below 0.5 m are its rounding. The one exception, STARLINK-34331 and STARLINK-37457 (SOCRATES 29 m, kessler 33.2 m), is being checked: the script now flags conjunctions where more than one element set fits within SOCRATES's 0.001-day precision.
+
+SOCRATES does not publish the hard-body radius behind its "maximum probability" (Alfano's method with a 100 × 300 × 100 m covariance shape, scaled to the worst case). Solving for the radius that reproduces each value gives 2.0 to 46 m, and it follows the objects involved. Among the 15 closest: about **2 m** when neither object is a Starlink, **11 to 17 m** for a Starlink and anything else, and **24 to 35 m** for two Starlinks. So SOCRATES appears to use a size for each object, much larger for Starlink, rather than one fixed radius. (An earlier run, on only the 24 conjunctions whose element sets CelesTrak still had, saw just 5.7 to 7.0 m.) The script now groups the radii by radar cross-section class to test this.
 
 ## M3: probability of collision, checked against NASA
 
@@ -119,6 +121,25 @@ It reads standard Conjunction Data Messages (CCSDS 508.0) and is compared with N
 | 106 | 1.6e-8 | 104 | 42 |
 
 CARA's own quadrature (64-point Gauss–Chebyshev) is accurate to about 1e-8, so the residual difference is at the level of its precision.
+
+## M4: how often Starlink satellites maneuver, seen from public data
+
+[`kessler/maneuvers.py`](kessler/maneuvers.py) reads one satellite's element-set history and finds the moments its orbit changed size: at each update it fits the mean semi-major axis before and after with a shared drag trend plus a step, and accepts the step if it is larger than 50 m and than 6 times the satellite's own noise. It is tested on synthetic histories with known maneuvers, and on real **debris, which cannot maneuver**: whatever it finds there is a false alarm.
+
+[`bench/m4_maneuvers.py`](bench/m4_maneuvers.py) ran it on the six months covered by SpaceX's report to the FCC (1 December 2025 to 31 May 2026), with Space-Track's full element-set history:
+
+| | |
+|---|---|
+| Starlink satellites on orbit for the whole period | 8,833 |
+| Sampled at random | 500 (90,694 satellite-days) |
+| Orbit changes detected | 6,504: **0.072 per satellite per day**, one every 14 days |
+| Debris control: 253 fragments of COSMOS 2251, IRIDIUM 33 and FENGYUN 1C (44,747 object-days) | 92 detections: 0.0021 per object per day, **3% of the Starlink rate** |
+| Scaled to the 8,833 satellites | about 115,000 orbit changes (112,000 after removing false alarms) |
+| SpaceX's report: collision-avoidance maneuvers alone | **207,152** |
+
+**The public catalogue shows only about half as many orbit changes as SpaceX reports collision-avoidance maneuvers**, even though the changes it does show also include station-keeping and every other reason to thrust. So at least roughly 45% of the reported avoidance maneuvers leave no visible step in public orbit data: either they change the orbit by less than 50 m, or the avoidance and the return to the planned orbit both happen between two public updates. Public data alone cannot count Starlink's avoidance maneuvers; it can only bound them.
+
+The comparison is approximate. Satellites launched or retired during the period also maneuvered and are not in the sample, and the FCC figure covers the whole fleet. Next: for each detected maneuver, screen the satellite against the catalogue as it stood just before, to see which maneuvers followed a predicted close approach.
 
 ## Limits
 

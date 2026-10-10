@@ -107,6 +107,16 @@ def main():
         "estimated_all_starlink_maneuvers_in_period": round(per_sat_period * len(on_orbit)),
         "fcc_collision_avoidance_per_sat_in_period": FCC_COUNT / max(len(on_orbit), 1),
         "detected_maneuvers_per_sat_in_period": per_sat_period,
+        # what the public catalogue can resolve: how often it updates, and the maneuvers it sees
+        "starlink_median_hours_between_element_sets": float(np.median(
+            [24.0 * o["days"] / max(o["elsets"] - 1, 1) for o in groups["starlink"].values()])),
+        "starlink_step_m_quantiles_10_50_90": [round(float(q), 1) for q in np.quantile(
+            np.abs([x for o in groups["starlink"].values() for x in o["steps_m"]] or [0.0]), [0.1, 0.5, 0.9])],
+        "starlink_raising_steps": sum(x > 0 for o in groups["starlink"].values() for x in o["steps_m"]),
+        "starlink_lowering_steps": sum(x < 0 for o in groups["starlink"].values() for x in o["steps_m"]),
+        "starlink_maneuvers_per_sat_quantiles_10_50_90": [float(q) for q in np.quantile(
+            [o["maneuvers"] for o in groups["starlink"].values()], [0.1, 0.5, 0.9])],
+        "starlink_net_of_false_alarms_in_period": round((srate - drate) * 182.0 * len(on_orbit)),
     }
     print(json.dumps(summary, indent=2))
     os.makedirs(os.path.dirname(a.out), exist_ok=True)

@@ -15,7 +15,8 @@ def show(path):
             if r.get("status") == "compared":
                 print(f"  {r['a'][:22]:>22} x {r['b'][:22]:<22} SOCRATES {r['socrates_range_km']*1e3:7.1f} m  "
                       f"kessler {r['kessler_range_km']*1e3:9.3f} m  dTCA {r['tca_diff_ms']:7.3f} ms  "
-                      f"maxP {r['socrates_max_prob']:.3e}  implied HBR {r.get('implied_hbr_m', float('nan')):.2f} m")
+                      f"maxP {r['socrates_max_prob']:.3e}  implied HBR {r.get('implied_hbr_m', float('nan')):.2f} m  "
+                      f"{r.get('pair', '')}{'  ambiguous' if r.get('ambiguous') else ''}")
             else:
                 print(f"  {r['a'][:22]:>22} x {r['b'][:22]:<22} {r['status']}")
     elif name.startswith("m2"):

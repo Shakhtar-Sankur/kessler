@@ -1,0 +1,23 @@
+{
+  "note": "Summary of the Kaggle T4 run of 2026-10-10 (derived numbers only; no Space-Track data).",
+  "summary": {
+    "period": [
+      "2025-12-01",
+      "2026-06-01"
+    ],
+    "fcc_reported_collision_avoidance": 207152,
+    "starlink_on_orbit_whole_period": 8833,
+    "starlink_sampled": 500,
+    "debris_sampled": 253,
+    "starlink_maneuvers": 6504,
+    "starlink_object_days": 90693.9,
+    "starlink_maneuvers_per_sat_per_day": 0.0717137280009804,
+    "starlink_operational_maneuvers_per_sat_per_day": 0.06923959785818756,
+    "debris_detections": 92,
+    "debris_object_days": 44747.1,
+    "false_alarms_per_object_per_day": 0.002056000827092893,
+    "estimated_all_starlink_maneuvers_in_period": 115287,
+    "fcc_collision_avoidance_per_sat_in_period": 23.45205479452055,
+    "detected_maneuvers_per_sat_in_period": 13.051898496178433
+  }
+}
