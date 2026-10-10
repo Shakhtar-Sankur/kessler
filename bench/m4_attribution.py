@@ -85,40 +85,48 @@ def analyse_day(st, day):
     else:
         ev, _ = screen(els, off, vmax, HOURS * 3600.0, 5.0)
     ev = ev[ev["vrel"] >= 0.01]                   # docked / co-located are not conjunctions
-    best = closest_per_object(ev, len(ids))
+    star = np.array(["STARLINK" in n.upper() for n in cat.name])
+    # Starlink against Starlink is coordinated inside SpaceX; avoidance is mostly about others
+    kinds = {"any": ev, "non_starlink": ev[~(star[ev["i"]] & star[ev["j"]])]}
+    best = {k: closest_per_object(e, len(ids)) for k, e in kinds.items()}
     print(f"{day}: {len(by_id)} objects downloaded, {len(ids)} in the catalogue at 00:00, "
           f"{len(ev)} approaches < 5 km in {HOURS:.0f} h ({time.time() - t0:.0f} s)")
 
     out = {"day": day, "objects": len(ids), "approaches": int(len(ev)), "maneuvered": [], "quiet": []}
     for q, norad in enumerate(ids):
-        if "STARLINK" not in cat.name[q].upper() or d0 - cat.mean["epoch"][q] > 1.0:
+        if not star[q] or d0 - cat.mean["epoch"][q] > 1.0:
             continue
         group, during = classify(by_id[norad], d0)
         if group is None:
             continue
-        rec = {"norad": norad, "closest_km": None}
-        b = best[q]
-        if b >= 0:
-            e = ev[b]
+        rec = {"norad": norad}
+        if group == "maneuvered":
+            rec["steps_m"] = [x[2] for x in during]
+            rec["maneuver_hours"] = [[(x[0] - d0) * 24, (x[1] - d0) * 24] for x in during]
+        rows = sorted(by_id[norad], key=lambda r: r["EPOCH"])
+        for kind, e_all in kinds.items():
+            b = best[kind][q]
+            if b < 0:
+                rec[kind] = None
+                continue
+            e = e_all[b]
             other = ids[e["j"] if e["i"] == q else e["i"]]
             tca = d0 + float(e["tca"]) / 86400.0
-            rec.update(closest_km=float(e["miss"]), tca_hours=float(e["tca"]) / 3600.0,
-                       vrel_km_s=float(e["vrel"]), partner=snap[other]["OBJECT_NAME"])
-            if group == "maneuvered":
-                rec["steps_m"] = [x[2] for x in during]
-                rec["maneuver_hours"] = [[(x[0] - d0) * 24, (x[1] - d0) * 24] for x in during]
-            # does the predicted approach survive the next element set?
+            r = {"closest_km": float(e["miss"]), "tca_hours": float(e["tca"]) / 3600.0,
+                 "vrel_km_s": float(e["vrel"]), "partner": snap[other]["OBJECT_NAME"]}
+            # does the predicted approach survive the satellite's next element set: the first
+            # after the maneuver, or for a quiet satellite its latest before the approach?
             if e["miss"] < 1.0:
-                rows = sorted(by_id[norad], key=lambda r: r["EPOCH"])
                 if group == "maneuvered":
-                    after = [r for r in rows if epoch_days(r["EPOCH"]) >= during[0][1]]
+                    after = [x for x in rows if epoch_days(x["EPOCH"]) >= during[0][1]]
                     new = after[0] if after and epoch_days(after[0]["EPOCH"]) < tca else None
                 else:
-                    before = [r for r in rows if d0 <= epoch_days(r["EPOCH"]) < tca]
+                    before = [x for x in rows if d0 <= epoch_days(x["EPOCH"]) < tca]
                     new = before[-1] if before else None
                 if new is not None:
                     m = min_distance_near(new, snap[other], tca)
-                    rec["recomputed_km"] = m[0] if m else ">200"
+                    r["recomputed_km"] = m[0] if m else ">200"
+            rec[kind] = r
         out[group].append(rec)
     print(f"  Starlink: {len(out['maneuvered'])} maneuvered during the day, {len(out['quiet'])} quiet")
     return out
@@ -127,25 +135,48 @@ def analyse_day(st, day):
 def summarise(days):
     groups = {g: [r for d in days for r in d[g]] for g in ("maneuvered", "quiet")}
     s = {"days": [d["day"] for d in days], "screening_hours": HOURS,
-         "satellites": {g: len(v) for g, v in groups.items()}, "predicted_closer_than": {}}
-    for thr in THRESHOLDS_KM:
-        row = {}
+         "satellites": {g: len(v) for g, v in groups.items()}}
+    for kind in ("any", "non_starlink"):
+        res = {"predicted_closer_than": {}, "recomputed_with_next_element_set": {}}
+        for thr in THRESHOLDS_KM:
+            row = {}
+            for g, v in groups.items():
+                k = sum(r[kind] is not None and r[kind]["closest_km"] < thr for r in v)
+                row[g] = {"count": k, "fraction_and_95ci": wilson(k, len(v))}
+            qm, qq = row["maneuvered"]["fraction_and_95ci"][0], row["quiet"]["fraction_and_95ci"][0]
+            row["ratio"] = qm / qq if qq > 0 else None
+            res["predicted_closer_than"][f"{thr} km"] = row
         for g, v in groups.items():
-            k = sum(r["closest_km"] is not None and r["closest_km"] < thr for r in v)
-            row[g] = {"count": k, "fraction_and_95ci": wilson(k, len(v))}
-        qm, qq = row["maneuvered"]["fraction_and_95ci"][0], row["quiet"]["fraction_and_95ci"][0]
-        row["ratio"] = qm / qq if qq > 0 else None
-        s["predicted_closer_than"][f"{thr} km"] = row
-    s["recomputed_with_next_element_set"] = {}
-    for g, v in groups.items():
-        pairs = [(r["closest_km"], r["recomputed_km"]) for r in v if "recomputed_km" in r]
-        moved = [(200.0 if n == ">200" else n) - p for p, n in pairs]
-        s["recomputed_with_next_element_set"][g] = {
-            "approaches": len(pairs),
-            "median_change_km": float(np.median(moved)) if moved else None,
-            "moved_further_by_more_than_1km": int(sum(m > 1.0 for m in moved)),
-        }
+            pairs = [(r[kind]["closest_km"], r[kind]["recomputed_km"]) for r in v
+                     if r[kind] is not None and "recomputed_km" in r[kind]]
+            moved = [(200.0 if n == ">200" else n) - p for p, n in pairs]
+            res["recomputed_with_next_element_set"][g] = {
+                "approaches": len(pairs),
+                "median_change_km": float(np.median(moved)) if moved else None,
+                "moved_further_than_1km": int(sum(m > 1.0 for m in moved)),
+                "moved_further_than_5km": int(sum(m > 5.0 for m in moved)),
+            }
+        s[kind] = res
     return s
+
+
+def table(s):
+    """The summary as a few readable lines."""
+    n = s["satellites"]
+    lines = [f"days {', '.join(s['days'])}; Starlink satellites: {n['maneuvered']} maneuvered, {n['quiet']} quiet"]
+    for kind, label in (("any", "any object"), ("non_starlink", "a non-Starlink object")):
+        lines.append(f"predicted approach within {s['screening_hours']:.0f} h to {label}:")
+        for thr, row in s[kind]["predicted_closer_than"].items():
+            fm, fq = row["maneuvered"]["fraction_and_95ci"], row["quiet"]["fraction_and_95ci"]
+            ratio = f"{row['ratio']:.2f}x" if row["ratio"] else "n/a"
+            lines.append(f"  < {thr:>7}: maneuvered {100 * fm[0]:5.1f}% [{100 * fm[1]:.1f}-{100 * fm[2]:.1f}]   "
+                         f"quiet {100 * fq[0]:5.1f}% [{100 * fq[1]:.1f}-{100 * fq[2]:.1f}]   ratio {ratio}")
+        for g, r in s[kind]["recomputed_with_next_element_set"].items():
+            if r["approaches"]:
+                lines.append(f"  approaches < 1 km recomputed, {g}: {r['approaches']}, median change "
+                             f"{r['median_change_km']:+.2f} km, moved > 1 km {r['moved_further_than_1km']}, "
+                             f"> 5 km {r['moved_further_than_5km']}")
+    return "\n".join(lines)
 
 
 def main():
@@ -162,9 +193,11 @@ def main():
             print(f"{day}: skipped ({type(e).__name__}: {e})")
     s = summarise(days)
     print(json.dumps(s, indent=2))
-    for d in days:                   # keep the file small: quiet satellites only with an approach
+    print(table(s))
+    for d in days:                   # keep the file small: quiet satellites only with a
+        # non-Starlink approach under 1 km
         d["quiet_satellites"] = len(d["quiet"])
-        d["quiet"] = [r for r in d["quiet"] if r["closest_km"] is not None]
+        d["quiet"] = [r for r in d["quiet"] if r["non_starlink"] and r["non_starlink"]["closest_km"] < 1.0]
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     with open(a.out, "w") as f:      # derived numbers only, no Space-Track data
         json.dump({"summary": s, "days": days}, f, indent=2)
