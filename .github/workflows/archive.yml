@@ -1,0 +1,49 @@
+# Every 6 hours: keep each new version of CelesTrak's SupGP orbits (fitted to the operators' own
+# ephemerides) and SOCRATES's closest conjunctions, which CelesTrak does not keep. They go to the
+# private repository Shakhtar-Sankur/kessler-archive when the ARCHIVE_TOKEN secret is set (a
+# fine-grained token with contents read/write on that repository), and otherwise to a workflow
+# artifact kept for 90 days.
+name: archive operator orbits
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check out the archive
+        if: env.ARCHIVE_TOKEN != ''
+        uses: actions/checkout@v4
+        with:
+          repository: Shakhtar-Sankur/kessler-archive
+          token: ${{ secrets.ARCHIVE_TOKEN }}
+          path: archive-repo
+      - name: Fetch
+        run: python -m kessler.archive --dir ${{ env.ARCHIVE_TOKEN != '' && 'archive-repo/data' || 'archive-artifact' }}
+      - name: Push to the archive
+        if: env.ARCHIVE_TOKEN != ''
+        working-directory: archive-repo
+        run: |
+          git config user.name "Sankur Kundu"
+          git config user.email "sankur.kundu.tw@gmail.com"
+          git add data
+          git diff --cached --quiet || git commit -q -m "Archive $(date -u +%FT%H%MZ)"
+          git push -q
+      - name: Keep as an artifact
+        if: env.ARCHIVE_TOKEN == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ github.run_id }}
+          path: archive-artifact
+          retention-days: 90
+          if-no-files-found: ignore

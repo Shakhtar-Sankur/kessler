@@ -22,7 +22,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES's 100 closest conjunctions reproduced (median 0.24 m) | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
 | M4: Starlink maneuvers vs FCC reports: public data shows about half as many orbit changes as reported avoidance maneuvers, and ties maneuvers to predicted conjunctions only weakly (1.3–1.5×) | done |
-| M5: daily pipeline and public page | planned |
+| M5: daily screening on GitHub Actions, public 3D page, archive of operator orbits | built, starting |
 
 ## M0: the propagator matches the reference
 
@@ -168,6 +168,14 @@ Three findings:
 3. **Public predictions are too coarse to do better.** With no maneuver at all, one routine update moves a predicted approach by a median 3.2 km to a non-Starlink object and 12.6 km to anything (mostly other Starlinks), far more than the distances that matter. SpaceX decides from its own precise ephemerides against a probability threshold of 3 in 10 million, which public element sets cannot reproduce.
 
 Together with the count above (the public catalogue shows about half as many orbit changes as SpaceX reports avoidance maneuvers), the conclusion is that **Starlink's collision-avoidance figures cannot be independently verified from public orbit data today**: most maneuvers leave no visible trace, and those that do can only rarely be tied to a conjunction anyone outside SpaceX can predict. A caveat: satellites that maneuver might also fly where traffic is denser, which this comparison does not yet control for.
+
+## M5: every day, in public
+
+**Page: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)** — a 3D globe of every tracked object, the day's closest approaches (select one to see both orbits around closest approach), running statistics and the audit's results.
+
+* **Daily screening** ([`.github/workflows/daily.yml`](.github/workflows/daily.yml), [`kessler/daily.py`](kessler/daily.py)): every morning (05:41 UTC) a GitHub Actions runner builds kessler, downloads Space-Track's full catalogue (objects with elements from the last 10 days), screens every pair for the next 24 hours on its CPU (about 2 minutes for the 16,695 active satellites on 4 cores), computes the worst-case probability of the 50 closest approaches, keeps the day's derived results in [`daily/`](daily) and deploys the page. Element sets are never published: the page gets counts, closest approaches and object positions only.
+* **Archive of operator orbits** ([`.github/workflows/archive.yml`](.github/workflows/archive.yml), [`kessler/archive.py`](kessler/archive.py)): every 6 hours it stores each new version of CelesTrak's supplemental element sets, which are fitted to the operators' own ephemerides (SpaceX for Starlink) and are far more precise than the public catalogue, plus SOCRATES's 2,000 closest conjunctions. CelesTrak serves only the current versions; this history is what M4's audit needs to be repeated with operator-quality orbits. It goes to a private repository, since kessler does not redistribute source data.
+* **Tests on every push** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Limits
 

@@ -1,0 +1,50 @@
+# Every day: screen the whole public catalogue for the next 24 hours, keep the day's derived
+# results in daily/, and publish the page (site/) with GitHub Pages.
+name: daily screening
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: daily
+  cancel-in-progress: false
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy scipy
+      - run: make
+      - name: Screen the catalogue
+        env:
+          SPACETRACK_USER: ${{ secrets.SPACETRACK_USER }}
+          SPACETRACK_PASS: ${{ secrets.SPACETRACK_PASS }}
+        run: python -m kessler.daily --now --out _site/data --history daily
+      - name: Keep the day's results
+        run: |
+          git config user.name "Sankur Kundu"
+          git config user.email "sankur.kundu.tw@gmail.com"
+          git add daily
+          git diff --cached --quiet || git commit -m "Daily screening $(date -u +%F)"
+          git pull --rebase -q origin main && git push -q origin HEAD:main
+      - run: cp -r site/. _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: screen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
