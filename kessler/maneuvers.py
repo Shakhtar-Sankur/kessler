@@ -84,7 +84,10 @@ def detect(t, a, floor_m=50.0, z=6.0, w=5, max_span_days=3.0, max_gap_days=4.0):
         idx = before + after
         tb = 0.5 * (t[k - 1] + t[k])
         x = np.column_stack([np.ones(len(idx)), t[idx] - tb, [0.0] * len(before) + [1.0] * len(after)])
-        xtx_inv = np.linalg.inv(x.T @ x)
+        xtx = x.T @ x
+        if np.linalg.matrix_rank(xtx) < 3:     # e.g. all snapshots on a side share one epoch
+            continue
+        xtx_inv = np.linalg.inv(xtx)
         beta = xtx_inv @ x.T @ am[idx]
         step[k] = beta[2]
         stat[k] = beta[2] / (sigma * math.sqrt(xtx_inv[2, 2]))

@@ -40,3 +40,10 @@ for p in sorted(glob.glob(os.path.join(ROOT, "bench", "results", "*.json"))):
         show(p)
     except Exception as e:
         print(f"{os.path.basename(p)}: could not summarise ({e})")
+
+# a step that crashed leaves its old .json (or none) behind: show the end of its log instead
+for log in sorted(glob.glob(os.path.join(ROOT, "bench", "results", "*.log"))):
+    text = open(log, errors="replace").read()
+    if "Traceback" in text or "Error" in text:
+        tail = "\n    ".join(text.strip().splitlines()[-6:])
+        print(f"{os.path.basename(log)} FAILED:\n    {tail}")

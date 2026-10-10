@@ -19,7 +19,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 |---|---|
 | M0: SGP4 (CPU), validated against the reference | done |
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
-| M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; SOCRATES reproduced to 0.45 m | done (full catalogue with debris next) |
+| M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES reproduced to 0.45 m | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
 | M4: Starlink maneuver detection vs FCC reports (detector tested on synthetic histories; real run needs Space-Track) | in progress |
 | M5: daily pipeline and public page | planned |
@@ -83,6 +83,18 @@ All 16,695 active objects on CelesTrak (10 Oct 2026), 24 hours from 2026-10-10 0
 The GPU and CPU runs find exactly the same approaches, with identical times and distances to the last digit (the unit test also checks this on a 30-minute run: 65,505 identical candidates).
 
 Of the 55,738 approaches, **43,123 (77%) are between two Starlink satellites**, the pairs that CelesTrak's SOCRATES service leaves out; 10,464 are Starlink with something else, 2,151 involve no Starlink. 935 are closer than 1 km and 35 closer than 200 m; the closest are STARLINK-30334 and BOTSAT-1 (8 m at 14.3 km/s) and STARLINK-31070 and STARLINK-31188 (10 m at 7.8 km/s). 77 docked or co-located pairs are reported separately. These come from public orbits accurate to about a kilometre: they are screening results, not predictions of collisions.
+
+### The full public catalogue, debris included
+
+Space-Track's catalogue (every on-orbit object with elements from the last 30 days: **32,593 objects**), 24 hours from 2026-10-10 08:12 UTC, 5 km, on the same T4:
+
+| | |
+|---|---|
+| Time | **27.7 s** (candidate search on the GPU 18.0 s) |
+| Approaches closer than 5 km | 75,820 (2,033 closer than 1 km, 85 closer than 200 m) |
+| Starlink with Starlink / with anything else / no Starlink | 44,782 / 13,682 / 17,356 |
+
+Adding the debris and inactive objects that the active catalogue lacks brings 20,000 more approaches, most of them (17,356) between objects that are neither Starlink. The closest approach, STARLINK-30334 and BOTSAT-1 at 8 m, is the same as in the active-catalogue run. Space-Track's data is used in memory only; the repository keeps derived numbers.
 
 ### Reproducing SOCRATES
 

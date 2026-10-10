@@ -6,6 +6,8 @@ in memory or in a local cache outside the repository, and publishes derived resu
 Requests are paced to stay well inside Space-Track's limits (30 per minute, 300 per hour).
 """
 import csv
+import gzip
+import hashlib
 import http.cookiejar
 import io
 import os
@@ -14,6 +16,7 @@ import urllib.parse
 import urllib.request
 
 BASE = "https://www.space-track.org"
+CACHE = os.environ.get("KESSLER_CACHE", os.path.join(os.path.expanduser("~"), ".cache", "kessler", "spacetrack"))
 
 
 def credentials():
@@ -35,8 +38,12 @@ class Client:
         self.pause = pause
         self.last = 0.0
         self.op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        self.logged_in = False
+
+    def _login(self):
         user, pw = credentials()
         self._open(BASE + "/ajaxauth/login", urllib.parse.urlencode({"identity": user, "password": pw}).encode())
+        self.logged_in = True
 
     def _open(self, url, data=None):
         wait = self.pause - (time.time() - self.last)
@@ -46,9 +53,24 @@ class Client:
         with self.op.open(url, data, timeout=600) as r:
             return r.read().decode()
 
-    def query(self, path):
-        """Rows of a basicspacedata query, e.g. 'class/gp/NORAD_CAT_ID/25544'."""
-        text = self._open(f"{BASE}/basicspacedata/query/{path.strip('/')}/format/csv")
+    def query(self, path, cache=True):
+        """Rows of a basicspacedata query, e.g. 'class/gp/NORAD_CAT_ID/25544'. Results are cached
+        on disk (KESSLER_CACHE), so a rerun after a crash does not ask Space-Track again; queries
+        relative to 'now' are never cached."""
+        url = f"{BASE}/basicspacedata/query/{path.strip('/')}/format/csv"
+        cache = cache and "now" not in path
+        f = os.path.join(CACHE, hashlib.sha256(url.encode()).hexdigest() + ".csv.gz")
+        if cache and os.path.exists(f):
+            text = gzip.open(f, "rt").read()
+        else:
+            if not self.logged_in:
+                self._login()
+            text = self._open(url)
+            if cache:
+                os.makedirs(CACHE, exist_ok=True)
+                with gzip.open(f + ".tmp", "wt") as out:
+                    out.write(text)
+                os.replace(f + ".tmp", f)
         return list(csv.DictReader(io.StringIO(text)))
 
     def gp_history(self, norad_ids, start, end, batch=100):

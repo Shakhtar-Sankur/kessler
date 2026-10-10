@@ -90,11 +90,15 @@ def element_sets(norad, tca_days, dse, cache):
 def fetch_history(soc, cache):
     """One Space-Track query for every object of every conjunction, around SOCRATES's epochs."""
     try:
-        from kessler.spacetrack import Client
-        st = Client()
+        _fetch_history(soc, cache)
     except Exception as e:
-        print(f"Space-Track history not used: {e}")
-        return
+        print(f"Space-Track history not used ({type(e).__name__}: {e}); CelesTrak only")
+
+
+def _fetch_history(soc, cache):
+    from kessler.spacetrack import Client, credentials
+    credentials()
+    st = Client()
     from collections import defaultdict
     from datetime import timedelta
     ids, epochs = set(), []

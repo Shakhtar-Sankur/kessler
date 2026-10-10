@@ -36,10 +36,14 @@ DEBRIS = ("COSMOS 2251 DEB", "IRIDIUM 33 DEB", "FENGYUN 1C DEB")
 def analyse(rows_by_id, operational_band_km=10.0):
     out = {}
     for norad, rows in rows_by_id.items():
-        t, a = history(rows)
-        if len(t) < 10:
+        try:
+            t, a = history(rows)
+            if len(t) < 10:
+                continue
+            k, step = detect(t, a)
+        except Exception as e:
+            print(f"object {norad}: skipped ({type(e).__name__}: {e})")
             continue
-        k, step = detect(t, a)
         alt = (a - 6378.135)
         shell = np.median(alt)
         # an element set is "operational" if within the band of the object's median altitude
