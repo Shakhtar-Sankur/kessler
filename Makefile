@@ -10,7 +10,7 @@ all: $(LIB)
 
 cuda: $(CUDA_LIB)
 
-$(CUDA_LIB): src/cuda.cu include/kessler/sgp4.hpp
+$(CUDA_LIB): src/cuda.cu include/kessler/sgp4.hpp include/kessler/screen.hpp
 	$(NVCC) -O3 -std=c++17 -Xcompiler -fPIC -shared -Iinclude --fmad=false $(CUDA_ARCH) src/cuda.cu -o $@
 
 $(LIB): src/capi.cpp src/screen.cpp include/kessler/sgp4.hpp include/kessler/screen.hpp

@@ -37,3 +37,38 @@ def propagate(els: Elsets, tsince, with_velocity=False, repeat=1):
     if rc != 0:
         raise RuntimeError("kessler_cuda_propagate failed")
     return r, v, err, ms.value
+
+
+if _lib is not None:
+    _lib.kessler_cuda_screen.argtypes = [_p, _p, _p, _i64, ctypes.c_double, ctypes.c_double, _i64,
+                                         ctypes.c_double, _p, _i64, ctypes.POINTER(ctypes.c_float)]
+    _lib.kessler_cuda_screen.restype = _i64
+
+
+def candidates(els: Elsets, off, vmax, t0, step, nsteps, dmax, cap=None):
+    """GPU version of kessler.screen.candidates. Also returns the GPU time in ms."""
+    from .screen import CANDIDATE_DTYPE
+    if not available():
+        raise RuntimeError("no CUDA device, or kessler/_libkessler_cuda.so not built")
+    cap = cap or 64 * els.n
+    while True:
+        buf = np.empty(cap, dtype=CANDIDATE_DTYPE)
+        ms = ctypes.c_float(0.0)
+        total = _lib.kessler_cuda_screen(_ptr(els.buf), _ptr(off), _ptr(vmax), els.n, t0, step,
+                                         nsteps, dmax, _ptr(buf), cap, ctypes.byref(ms))
+        if total < 0:
+            raise RuntimeError("kessler_cuda_screen failed")
+        if total <= cap:
+            return buf[:total], ms.value
+        cap = total
+
+
+def screen(els: Elsets, off, vmax, duration, dmax, step=10.0):
+    """kessler.screen.screen with candidates found on the GPU. Returns events, candidates and
+    the GPU time in ms."""
+    import math
+    from .screen import merge_approaches, refine
+    nsteps = int(math.ceil(duration / step)) + 1
+    cand, ms = candidates(els, off, vmax, 0.0, step, nsteps, dmax)
+    ev = merge_approaches(refine(els, off, cand, 0.0, step, dmax))
+    return ev[(ev["tca"] >= 0.0) & (ev["tca"] <= duration)], cand, ms
