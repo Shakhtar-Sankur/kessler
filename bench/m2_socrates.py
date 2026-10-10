@@ -59,8 +59,20 @@ def days_since_1949(dt):
     return (dt - datetime(1949, 12, 31)).total_seconds() / 86400.0
 
 
+def matching(rows, tca_days, dse):
+    for row in rows:
+        if "EPOCH" in row and abs((tca_days - epoch_days(row["EPOCH"])) - dse) < 1e-3:
+            return row
+    return None
+
+
 def element_sets(norad, tca_days, dse, cache):
-    """The element set SOCRATES used for this object, or None: GP first, then SupGP."""
+    """The element set SOCRATES used for this object, or None: CelesTrak GP, CelesTrak SupGP, then
+    (if credentials are set) Space-Track's history, which keeps superseded element sets."""
+    if ("history", norad) in cache:
+        row = matching(cache[("history", norad)], tca_days, dse)
+        if row is not None:
+            return row, "space-track gp_history"
     for kind, url in (("gp", GP), ("supgp", SUPGP)):
         key = (kind, norad)
         if key not in cache:
@@ -69,12 +81,36 @@ def element_sets(norad, tca_days, dse, cache):
             except Exception:
                 rows = []
             cache[key] = rows
-        for row in cache[key]:
-            if "EPOCH" not in row:
-                continue
-            if abs((tca_days - epoch_days(row["EPOCH"])) - dse) < 1e-3:
-                return row, kind
+        row = matching(cache[key], tca_days, dse)
+        if row is not None:
+            return row, kind
     return None, None
+
+
+def fetch_history(soc, cache):
+    """One Space-Track query for every object of every conjunction, around SOCRATES's epochs."""
+    try:
+        from kessler.spacetrack import Client
+        st = Client()
+    except Exception as e:
+        print(f"Space-Track history not used: {e}")
+        return
+    from collections import defaultdict
+    from datetime import timedelta
+    ids, epochs = set(), []
+    for c in soc:
+        tca = parse_time(c["TCA"])
+        for k in ("1", "2"):
+            ids.add(int(c["NORAD_CAT_ID_" + k]))
+            epochs.append(tca - timedelta(days=float(c["DSE_" + k])))
+    start = (min(epochs) - timedelta(days=1)).strftime("%Y-%m-%d")
+    end = (max(epochs) + timedelta(days=2)).strftime("%Y-%m-%d")
+    by = defaultdict(list)
+    for r in st.gp_history(sorted(ids), start, end):
+        by[int(r["NORAD_CAT_ID"])].append(r)
+    for norad, rows in by.items():
+        cache[("history", norad)] = rows
+    print(f"Space-Track history: {sum(len(v) for v in by.values())} element sets for {len(by)} objects")
 
 
 def main():
@@ -86,6 +122,7 @@ def main():
     soc = list(csv.DictReader(io.StringIO(get(SOCRATES, 0))))[: a.n]
     print(f"SOCRATES: {len(soc)} conjunctions (closest first); columns {list(soc[0])}")
     cache, rows = {}, []
+    fetch_history(soc, cache)
     for c in soc:
         tca = parse_time(c["TCA"])
         tca_days = days_since_1949(tca)
@@ -133,7 +170,11 @@ def main():
               f"SOCRATES maxP {sp:.3e}  implied HBR {row.get('implied_hbr_m', float('nan')):.2f} m")
 
     done = [r for r in rows if r["status"] == "compared"]
-    summary = {"socrates_rows": len(soc), "compared": len(done),
+    sources = {}
+    for r in done:
+        for k in r["elements"]:
+            sources[k] = sources.get(k, 0) + 1
+    summary = {"socrates_rows": len(soc), "compared": len(done), "element_set_sources": sources,
                "skipped": {s: sum(r["status"] == s for r in rows) for s in {r["status"] for r in rows} - {"compared"}}}
     if done:
         summary.update(

@@ -19,7 +19,7 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 |---|---|
 | M0: SGP4 (CPU), validated against the reference | done |
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
-| M2: all-vs-all screening (CPU done and proven against brute force; GPU awaiting its T4 run) | in progress |
+| M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; SOCRATES reproduced to 0.45 m | done (full catalogue with debris next) |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
 | M4: Starlink maneuver detection vs FCC reports (detector tested on synthetic histories; real run needs Space-Track) | in progress |
 | M5: daily pipeline and public page | planned |
@@ -71,7 +71,30 @@ Every 10 seconds of simulated time, each object is placed in a 3D grid whose cel
 
 Two physical facts are built into the comparison, and both are stated rather than hidden. Objects flying in formation (a train of satellites, a cargo ship docked to the ISS) keep an almost constant distance, so their "closest approach" is flat to the millimetre and its time is ill-defined; events of the same pair less than 5 minutes apart are therefore one approach (two genuine approaches of one pair are about half an orbit apart). Docked and co-located objects (relative speed below 10 m/s) are reported separately, not as conjunctions.
 
-First look (CPU, CelesTrak active catalogue of 10 Oct 2026, 1 hour, 5 km): 2,238 approaches, 1,675 of them between two Starlink satellites, the pairs that CelesTrak's SOCRATES service leaves out. The closest: STARLINK-2415 and TOMORROW-S4, 88 m apart at 4.6 km/s. These come from public orbits accurate to about a kilometre, so they are screening results, not predictions of collisions.
+### One day of the whole active catalogue on a free T4
+
+All 16,695 active objects on CelesTrak (10 Oct 2026), 24 hours from 2026-10-10 00:00 UTC, every pair closer than 5 km (Kaggle, one Tesla T4, 4 CPU cores):
+
+| | Time | Approaches found |
+|---|---|---|
+| **kessler, GPU** (candidates on the T4, refinement on the CPU) | **16.4 s** (candidate search 6.8 s) | 55,738 |
+| kessler, CPU (4 cores) | 177.3 s | 55,738 |
+
+The GPU and CPU runs find exactly the same approaches, with identical times and distances to the last digit (the unit test also checks this on a 30-minute run: 65,505 identical candidates).
+
+Of the 55,738 approaches, **43,123 (77%) are between two Starlink satellites**, the pairs that CelesTrak's SOCRATES service leaves out; 10,464 are Starlink with something else, 2,151 involve no Starlink. 935 are closer than 1 km and 35 closer than 200 m; the closest are STARLINK-30334 and BOTSAT-1 (8 m at 14.3 km/s) and STARLINK-31070 and STARLINK-31188 (10 m at 7.8 km/s). 77 docked or co-located pairs are reported separately. These come from public orbits accurate to about a kilometre: they are screening results, not predictions of collisions.
+
+### Reproducing SOCRATES
+
+[CelesTrak's SOCRATES](https://celestrak.org/SOCRATES/) has screened active satellites against the public catalogue since 2004, with commercial software (STK/CAT). [`bench/m2_socrates.py`](bench/m2_socrates.py) takes its 100 closest conjunctions, recovers the exact element sets SOCRATES used (each object's days-from-epoch must match SOCRATES's to 0.001 day) and computes the same approaches with kessler. On the 24 for which those element sets were still available (CelesTrak had replaced the others since SOCRATES's run; the script now also looks them up in Space-Track's history):
+
+| | Largest difference from SOCRATES | Median |
+|---|---|---|
+| Distance at closest approach | 0.45 m | 0.30 m |
+| Time of closest approach | 15.5 ms | |
+| Relative speed | 0.45 m/s | |
+
+SOCRATES does not publish the hard-body radius behind its "maximum probability" (Alfano's method with a 100 × 300 × 100 m covariance shape, scaled to the worst case). Solving for the radius that reproduces each of its 24 values gives **5.7 to 7.0 m**, the same narrow range for every conjunction.
 
 ## M3: probability of collision, checked against NASA
 
