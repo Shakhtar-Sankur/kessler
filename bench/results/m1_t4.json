@@ -1,0 +1,35 @@
+{
+  "gpu": "Tesla T4",
+  "cpu": "x86_64",
+  "cpu_count": 4,
+  "objects": 16695,
+  "near_earth_objects": 15890,
+  "times": 1440,
+  "states": 24040800,
+  "methods": {
+    "kessler-cpu": {
+      "seconds": 3.8006707889999802,
+      "states_per_s": 6325409.732823909,
+      "max_dr_km_vs_reference": 9.208633855450898e-11
+    },
+    "sgp4-array": {
+      "seconds": 13.988798193000008,
+      "states_per_s": 1718575.0818844475
+    },
+    "kessler-cuda": {
+      "kernel_ms": 191.32908630371094,
+      "states_per_s_kernel": 125651569.5780737,
+      "seconds_incl_copies": 1.6774906329999908,
+      "max_dr_km_vs_kessler_cpu": 2.219167072325945e-10,
+      "max_dr_km_vs_reference": 1.0186340659856796e-10,
+      "error_code_mismatches_vs_cpu": 0
+    },
+    "dsgp4-cuda": {
+      "init_seconds": 2.738334960999964,
+      "seconds": 0.3587201149999828,
+      "states": 953400,
+      "states_per_s": 2657782.377216415,
+      "max_dr_km_vs_reference": 6.89988155500032e-09
+    }
+  }
+}

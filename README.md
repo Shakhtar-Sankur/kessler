@@ -18,8 +18,8 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | Milestone | State |
 |---|---|
 | M0: SGP4 (CPU), validated against the reference | done |
-| M1: SGP4 on CUDA, full catalogue on a T4 | next |
-| M2: GPU all-vs-all screening | planned |
+| M1: SGP4 on CUDA, full catalogue on a T4 | done |
+| M2: GPU all-vs-all screening | next |
 | M3: collision probability | planned |
 | M4: Starlink maneuver detection vs FCC reports | planned |
 | M5: daily pipeline and public page | planned |
@@ -40,6 +40,21 @@ python3 -m venv .venv && .venv/bin/pip install sgp4 numpy pytest
 make
 .venv/bin/python -m pytest -q -s tests/
 ```
+
+## M1: the whole catalogue, every minute of a day, on a free T4
+
+16,695 objects (every active object on CelesTrak, 10 Oct 2026) propagated to 1,440 times, one minute apart: 24,040,800 states. Kaggle, one Tesla T4, 4 CPU cores ([raw results](bench/results/m1_t4.json), [script](bench/m1_propagate.py)).
+
+| Method | States per second | vs reference library | Max position error vs reference |
+|---|---|---|---|
+| **kessler, CUDA kernel (T4, fp64)** | **125.7 M** | **73×** | 1.0e-10 km |
+| kessler, CPU (4 cores, OpenMP) | 6.3 M | 3.7× | 9.2e-11 km |
+| python `sgp4` SatrecArray (Vallado's C++, 1 thread) | 1.7 M | 1× | (the reference) |
+| dsgp4 on the T4 (ESA's PyTorch SGP4), near-earth objects only | 2.7 M | 1.5× | 6.9e-9 km |
+
+- The kernel's 191 ms covers the propagation alone. With the copies to and from the GPU it takes 1.68 s, mostly moving 577 MB of positions back to the host; screening (M2) keeps them on the GPU.
+- The GPU and CPU builds agree to 2.2e-10 km on all 24 million states, with identical error codes.
+- dsgp4 is built for differentiable propagation (gradients for orbit fitting), not for throughput, and its batched propagator handles near-earth objects only, so it was timed on 15,890 objects at 60 of the times, one call per time. It is a fair accuracy check and a rough speed reference, not a like-for-like contest.
 
 ## Limits
 
