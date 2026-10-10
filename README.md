@@ -1,6 +1,16 @@
 # kessler
 
-An independent, open-source space-traffic auditor.
+An independent, open-source space-traffic auditor. **Live: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)**, updated every day.
+
+[![The whole public catalogue on 10 October 2026: 32,066 objects, coloured by type, and the day's closest approaches in red](docs/screenshots/globe.png)](https://shakhtar-sankur.github.io/kessler/)
+
+<table><tr>
+<td width="68%"><img src="docs/screenshots/closest_approach.png" alt="The day's closest approach: STARLINK-30334 and BOTSAT-1, 8 m apart at 14.3 km/s, with both orbits drawn"></td>
+<td width="32%"><img src="docs/screenshots/phone.png" alt="The page on a phone"></td>
+</tr><tr>
+<td>The day's closest approach, STARLINK-30334 and BOTSAT-1 at 8 m, with both orbits drawn</td>
+<td>On a phone</td>
+</tr></table>
 
 SpaceX reports that Starlink satellites made **207,152 collision-avoidance maneuvers** between December 2025 and May 2026. Its satellites maneuver automatically whenever the probability of a collision passes 3 in 10 million. Nobody outside SpaceX can check those numbers today.
 
