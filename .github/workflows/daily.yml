@@ -1,4 +1,4 @@
-# Every day: screen the whole public catalogue for the next 24 hours, keep the day's derived
+# Every day: screen CelesTrak's public catalogue of active satellites for the next 24 hours, keep the day's derived
 # results in daily/, and publish the page (site/) with GitHub Pages.
 name: daily screening
 on:
@@ -23,10 +23,7 @@ jobs:
           python-version: "3.12"
       - run: pip install numpy scipy
       - run: make
-      - name: Screen the catalogue
-        env:
-          SPACETRACK_USER: ${{ secrets.SPACETRACK_USER }}
-          SPACETRACK_PASS: ${{ secrets.SPACETRACK_PASS }}
+      - name: Screen the catalogue (CelesTrak public data; Space-Track's terms bar publishing analyses of its data)
         run: python -m kessler.daily --now --out _site/data --history daily
       - name: Keep the day's results
         run: |

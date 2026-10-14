@@ -2,15 +2,10 @@
 
 An independent, open-source space-traffic auditor. **Live: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)**, updated every day.
 
-[![The whole public catalogue on 10 October 2026: 32,066 objects, coloured by type, and the day's closest approaches in red](docs/screenshots/globe.png)](https://shakhtar-sankur.github.io/kessler/)
-
-<table><tr>
-<td width="68%"><img src="docs/screenshots/closest_approach.png" alt="The day's closest approach: STARLINK-30334 and BOTSAT-1, 8 m apart at 14.3 km/s, with both orbits drawn"></td>
-<td width="32%"><img src="docs/screenshots/phone.png" alt="The page on a phone"></td>
-</tr><tr>
-<td>The day's closest approach, STARLINK-30334 and BOTSAT-1 at 8 m, with both orbits drawn</td>
-<td>On a phone</td>
-</tr></table>
+> **Data-use notice (14 Oct 2026).** Results computed from Space-Track.org data are withheld from this
+> repository and the page while approval to publish analyses of that data is requested from the 18th
+> Space Defense Squadron, as Space-Track's user agreement requires. The code and methods stay public;
+> the daily page now uses CelesTrak's public data only.
 
 SpaceX reports that Starlink satellites made **207,152 collision-avoidance maneuvers** between December 2025 and May 2026. Its satellites maneuver automatically whenever the probability of a collision passes 3 in 10 million. Nobody outside SpaceX can check those numbers today.
 
@@ -31,8 +26,8 @@ Named after the Kessler syndrome: the runaway cascade of collisions that this ki
 | M1: SGP4 on CUDA, full catalogue on a T4 | done |
 | M2: all-vs-all screening, proven against brute force; GPU = CPU on a T4; full 32,593-object catalogue in 28 s; SOCRATES's 100 closest conjunctions reproduced (median 0.24 m) | done |
 | M3: collision probability (matches NASA CARA on 53 real conjunctions) | in progress |
-| M4: Starlink maneuvers vs FCC reports: public data shows about half as many orbit changes as reported avoidance maneuvers, and ties maneuvers to predicted conjunctions only weakly (1.3–1.5×) | done |
-| M5: daily screening on GitHub Actions, public 3D page, archive of operator orbits | running daily since 2026-10-10 |
+| M4: Starlink maneuvers vs FCC reports (results withheld pending data-use approval) | done |
+| M5: daily screening on GitHub Actions (CelesTrak public data), public 3D page, archive of operator orbits | running daily |
 
 ## M0: the propagator matches the reference
 
@@ -96,15 +91,7 @@ Of the 55,738 approaches, **43,123 (77%) are between two Starlink satellites**, 
 
 ### The full public catalogue, debris included
 
-Space-Track's catalogue (every on-orbit object with elements from the last 30 days: **32,593 objects**), 24 hours from 2026-10-10 08:12 UTC, 5 km, on the same T4:
-
-| | |
-|---|---|
-| Time | **27.7 s** (candidate search on the GPU 18.0 s) |
-| Approaches closer than 5 km | 75,820 (2,033 closer than 1 km, 85 closer than 200 m) |
-| Starlink with Starlink / with anything else / no Starlink | 44,782 / 13,682 / 17,356 |
-
-Adding the debris and inactive objects that the active catalogue lacks brings 20,000 more approaches, most of them (17,356) between objects that are neither Starlink. The closest approach, STARLINK-30334 and BOTSAT-1 at 8 m, is the same as in the active-catalogue run. Space-Track's data is used in memory only; the repository keeps derived numbers.
+Results of this run are withheld pending approval to publish analyses of Space-Track data (see the notice at the top); its speed is a property of the software: **27.7 s** for **32,593 objects** on a T4 (candidate search on the GPU 18.0 s).
 
 ### Reproducing SOCRATES
 
@@ -116,9 +103,7 @@ Adding the debris and inactive objects that the active catalogue lacks brings 20
 | Time of closest approach | 15.5 ms | |
 | Relative speed | 0.49 m/s | |
 
-SOCRATES rounds distances to the metre, so differences below 0.5 m are its rounding. The one exception, STARLINK-34331 and STARLINK-37457 (SOCRATES 29 m, kessler 33.2 m), is being checked: the script now flags conjunctions where more than one element set fits within SOCRATES's 0.001-day precision.
-
-SOCRATES does not publish the hard-body radius behind its "maximum probability" (Alfano's method with a 100 × 300 × 100 m covariance shape, scaled to the worst case). Solving for the radius that reproduces each value gives 2.0 to 46 m, and it follows the objects involved. Among the 15 closest: about **2 m** when neither object is a Starlink, **11 to 17 m** for a Starlink and anything else, and **24 to 35 m** for two Starlinks. So SOCRATES appears to use a size for each object, much larger for Starlink, rather than one fixed radius. (An earlier run, on only the 24 conjunctions whose element sets CelesTrak still had, saw just 5.7 to 7.0 m.) The script now groups the radii by radar cross-section class to test this.
+SOCRATES rounds distances to the metre, so differences below 0.5 m are its rounding. Per-conjunction results and the analysis of SOCRATES's hard-body radii are withheld pending the approval above.
 
 ## M3: probability of collision, checked against NASA
 
@@ -136,54 +121,13 @@ CARA's own quadrature (64-point Gauss–Chebyshev) is accurate to about 1e-8, so
 
 [`kessler/maneuvers.py`](kessler/maneuvers.py) reads one satellite's element-set history and finds the moments its orbit changed size: at each update it fits the mean semi-major axis before and after with a shared drag trend plus a step, and accepts the step if it is larger than 50 m and than 6 times the satellite's own noise. It is tested on synthetic histories with known maneuvers, and on real **debris, which cannot maneuver**: whatever it finds there is a false alarm.
 
-[`bench/m4_maneuvers.py`](bench/m4_maneuvers.py) ran it on the six months covered by SpaceX's report to the FCC (1 December 2025 to 31 May 2026), with Space-Track's full element-set history:
-
-| | |
-|---|---|
-| Starlink satellites on orbit for the whole period | 8,833 |
-| Sampled at random | 500 (90,694 satellite-days) |
-| Orbit changes detected | 6,504: **0.072 per satellite per day**, one every 14 days |
-| Debris control: 253 fragments of COSMOS 2251, IRIDIUM 33 and FENGYUN 1C (44,747 object-days) | 92 detections: 0.0021 per object per day, **3% of the Starlink rate** |
-| Scaled to the 8,833 satellites | about 115,000 orbit changes (112,000 after removing false alarms) |
-| SpaceX's report: collision-avoidance maneuvers alone | **207,152** |
-
-**The public catalogue shows only about half as many orbit changes as SpaceX reports collision-avoidance maneuvers**, even though the changes it does show also include station-keeping and every other reason to thrust. So at least roughly 45% of the reported avoidance maneuvers leave no visible step in public orbit data: either they change the orbit by less than 50 m, or the avoidance and the return to the planned orbit both happen between two public updates. Public data alone cannot count Starlink's avoidance maneuvers; it can only bound them.
-
-The comparison is approximate. Satellites launched or retired during the period also maneuvered and are not in the sample, and the FCC figure covers the whole fleet.
-
-### Do the maneuvers follow predicted close approaches?
-
-If Starlink's maneuvers are collision avoidance, satellites that maneuver should more often have had a close approach coming. [`bench/m4_attribution.py`](bench/m4_attribution.py) tests this on six days spread over the FCC period (the 15th of each month). For each day it rebuilds the public catalogue as it stood at midnight from Space-Track's history (about 18,000 objects whose orbits reach the Starlink shells), screens it for the next 48 hours on the GPU, and compares the Starlink satellites in a stable shell that **maneuvered that day (2,082)** with those that **did not maneuver from the day before to two days after (40,832)**.
-
-Predicted approach within 48 h to a **non-Starlink object** (debris, rocket bodies, other operators; SpaceX coordinates Starlink-Starlink passes internally), with 95% intervals:
-
-| Closer than | Maneuvered | Did not maneuver | Ratio |
-|---|---|---|---|
-| 0.5 km | 3.3% [2.6–4.2] | 2.2% [2.0–2.3] | **1.53×** |
-| 1 km | 11.1% [9.8–12.5] | 8.6% [8.3–8.8] | **1.30×** |
-| 2 km | 35.0% [32.9–37.0] | 29.3% [28.8–29.7] | 1.19× |
-| 5 km | 87.7% [86.2–89.0] | 81.9% [81.6–82.3] | 1.07× |
-
-Re-running each predicted approach under 1 km with the satellite's next element set:
-
-| | Approaches | Median change in predicted distance | Moved away by more than 5 km |
-|---|---|---|---|
-| After a maneuver | 116 | **+8.3 km** | 72 (62%) |
-| After a routine update, no maneuver | 2,968 | +3.2 km | 1,191 (40%) |
-
-Three findings:
-
-1. **There is a real signal.** Satellites that maneuvered were 1.3 to 1.5 times as likely to have a predicted approach under 1 km to a non-Starlink object, and the intervals do not overlap. A maneuver moves such an approach away 2.6 times as far as a routine update does.
-2. **It is small.** The excess is 2.5 percentage points at 1 km and about 6 at 2 to 5 km: the public catalogue points to a close approach for only a few percent of the maneuvers beyond what any satellite sees on any day.
-3. **Public predictions are too coarse to do better.** With no maneuver at all, one routine update moves a predicted approach by a median 3.2 km to a non-Starlink object and 12.6 km to anything (mostly other Starlinks), far more than the distances that matter. SpaceX decides from its own precise ephemerides against a probability threshold of 3 in 10 million, which public element sets cannot reproduce.
-
-Together with the count above (the public catalogue shows about half as many orbit changes as SpaceX reports avoidance maneuvers), the conclusion is that **Starlink's collision-avoidance figures cannot be independently verified from public orbit data today**: most maneuvers leave no visible trace, and those that do can only rarely be tied to a conjunction anyone outside SpaceX can predict. A caveat: satellites that maneuver might also fly where traffic is denser, which this comparison does not yet control for.
+[`bench/m4_maneuvers.py`](bench/m4_maneuvers.py) runs it on the six months covered by SpaceX's report to the FCC (1 December 2025 to 31 May 2026) with a debris control group, and [`bench/m4_attribution.py`](bench/m4_attribution.py) tests whether the maneuvers follow predicted close approaches. Both need Space-Track's element-set history; their results are withheld pending the approval above, and anyone with their own Space-Track access can run them.
 
 ## M5: every day, in public
 
-**Page: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)** — a 3D globe of every tracked object, the day's closest approaches (select one to see both orbits around closest approach), running statistics and the audit's results.
+**Page: [shakhtar-sankur.github.io/kessler](https://shakhtar-sankur.github.io/kessler/)** — a 3D globe of the active satellites in CelesTrak's public catalogue, the day's closest approaches (select one to see both orbits around closest approach) and running statistics.
 
-* **Daily screening** ([`.github/workflows/daily.yml`](.github/workflows/daily.yml), [`kessler/daily.py`](kessler/daily.py)): every morning (05:41 UTC) a GitHub Actions runner builds kessler, downloads Space-Track's full catalogue (objects with elements from the last 10 days), screens every pair for the next 24 hours on its CPU (the first run, on 10 October 2026: **32,066 objects, debris included, in 4 minutes** on GitHub's free 4-core runner; 80,278 approaches under 5 km, 2,810 under 1 km, 139 under 200 m), computes the worst-case probability of the 50 closest approaches, keeps the day's derived results in [`daily/`](daily) and deploys the page. Element sets are never published: the page gets counts, closest approaches and object positions only.
+* **Daily screening** ([`.github/workflows/daily.yml`](.github/workflows/daily.yml), [`kessler/daily.py`](kessler/daily.py)): every morning (05:41 UTC) a GitHub Actions runner builds kessler, downloads CelesTrak's public catalogue of active satellites, screens every pair for the next 24 hours on its CPU, computes the worst-case probability of the 50 closest approaches, keeps the day's derived results in [`daily/`](daily) and deploys the page. Element sets are never published.
 * **Archive of operator orbits** ([`.github/workflows/archive.yml`](.github/workflows/archive.yml), [`kessler/archive.py`](kessler/archive.py)): every 6 hours it stores each new version of CelesTrak's supplemental element sets, which are fitted to the operators' own ephemerides (SpaceX for Starlink) and are far more precise than the public catalogue, plus SOCRATES's 2,000 closest conjunctions. CelesTrak serves only the current versions; this history is what M4's audit needs to be repeated with operator-quality orbits. It goes to a private repository, since kessler does not redistribute source data.
 * **Tests on every push** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 

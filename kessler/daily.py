@@ -2,8 +2,8 @@
 
     python -m kessler.daily --out site_data [--history daily]
 
-Catalogue: Space-Track's full catalogue (on-orbit objects with elements from the last 10 days)
-when SPACETRACK_USER / SPACETRACK_PASS are set, otherwise CelesTrak's active satellites, or a
+Catalogue: CelesTrak's active satellites; Space-Track's full catalogue only with
+KESSLER_USE_SPACETRACK=1 (for private analysis, never published), or a
 local OMM CSV with --csv. Writes derived results only, never element sets:
 
   <out>/latest.json        everything the public page shows: counts, the closest approaches with
@@ -70,6 +70,10 @@ def load(csv_path=None, max_age_days=10.0):
         op = gzip.open if csv_path.endswith(".gz") else open
         with op(csv_path, "rt") as f:
             return list(csv.DictReader(f)), f"file {os.path.basename(csv_path)}"
+    # Space-Track only when explicitly asked for (private analysis): its user agreement bars
+    # transferring analyses of its data without approval, so published runs use CelesTrak.
+    if os.environ.get("KESSLER_USE_SPACETRACK") != "1":
+        return list(csv.DictReader(io.StringIO(fetch("active")))), "CelesTrak active satellites"
     try:
         from .spacetrack import Client, credentials
         credentials()
