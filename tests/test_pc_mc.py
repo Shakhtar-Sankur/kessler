@@ -52,12 +52,12 @@ def test_fast_encounter_matches_2d():
     """For a fast encounter the 2D method is exact enough; the Monte Carlo must agree."""
     r1, v1, c1, r2, v2, c2 = encounter(10_000.0, 30.0, 40.0)
     p2 = pc2d(r1, v1, c1[:3, :3], r2, v2, c2[:3, :3], 10.0)
-    for space in ("cartesian", "equinoctial"):
+    for space in ("cartesian", "equinoctial", "equinoctial-n"):
         res = pc_mc(r1, v1, c1, r2, v2, c2, 10.0, 2_000_000, seed=3, space=space)
         assert res["lo"] < p2 < res["hi"], (space, res, p2)
 
 
-@pytest.mark.parametrize("space", [0, 1])
+@pytest.mark.parametrize("space", [0, 1, 2])
 @pytest.mark.parametrize("speed", [10_000.0, 300.0, 5.0])
 def test_search_windows_change_nothing(space, speed):
     """Restricting each trial to the windows where it can hit gives exactly the hits of a
@@ -65,8 +65,8 @@ def test_search_windows_change_nothing(space, speed):
     r1, v1, c1, r2, v2, c2 = encounter(speed, 300.0, 200.0)
     w = min(orbit_period(r1, v1), orbit_period(r2, v2)) / 4.0
     if space:
-        m1, c1 = to_equinoctial(r1, v1, c1)
-        m2, c2 = to_equinoctial(r2, v2, c2)
+        m1, c1 = to_equinoctial(r1, v1, c1, mean_motion=space == 2)
+        m2, c2 = to_equinoctial(r2, v2, c2, mean_motion=space == 2)
     else:
         m1, m2 = np.concatenate([r1, v1]), np.concatenate([r2, v2])
     a1, a2 = _factor(c1), _factor(c2)
@@ -107,3 +107,19 @@ def test_nasa_slow_encounter():
     p, n = row["NhitSDMC"] / row["NtotSDMC"], res["trials"]
     z = (res["pc"] - p) / math.sqrt(p * (1 - p) / n)
     assert abs(z) < 4, (res, row["PcSDMC"])
+
+
+def test_nasa_far_tail_needs_mean_motion_elements():
+    """CARA's case 45 (ICESat-2 and SpaceBEE-114, Pc 7.4e-7 from 2,952 hits in 4 billion trials):
+    with the elements CARA samples (mean motion) the Monte Carlo agrees; with the semi-major
+    axis in their place it is high, with Cartesian states far too low."""
+    from test_pc import cara_table, fetch
+    from kessler.pc import pc_mc_from_cdm
+    row = [r for r in cara_table() if r["Conjunction_ID"].startswith("000043613_conj_000052010")]
+    if not row:
+        pytest.skip("case not in CARA's table")
+    row = row[0]
+    cdm = fetch(row["Conjunction_ID"] + ".cdm").decode()
+    res = pc_mc_from_cdm(cdm, 20_000_000, hbr=row["HBR_m"], seed=3)
+    p, n = row["NhitSDMC"] / row["NtotSDMC"], res["trials"]
+    assert abs(res["hits"] - p * n) < 4 * math.sqrt(p * n), (res, p * n)

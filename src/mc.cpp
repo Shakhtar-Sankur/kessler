@@ -187,14 +187,17 @@ struct Rng {
 inline void to_state(const double* x, int space, Vec& r, Vec& v) {
   if (space == 1) {
     eq_to_cart(x, r, v);
+  } else if (space == 2) {  // the same elements with mean motion n (rad/s) in place of a
+    double el[6] = {std::cbrt(MU / (x[0] * x[0])), x[1], x[2], x[3], x[4], x[5]};
+    eq_to_cart(el, r, v);
   } else {
     r = {x[0], x[1], x[2]};
     v = {x[3], x[4], x[5]};
   }
 }
 
-// Draws one state, x = mean + a z with z standard normal, in Cartesian coordinates (space 0)
-// or equinoctial elements (space 1); returns |z|^2.
+// Draws one state, x = mean + a z with z standard normal, in Cartesian coordinates (space 0),
+// equinoctial elements with a (space 1) or with mean motion n (space 2); returns |z|^2.
 double sample(Rng& g, const double* mean, const double* a, int space, Vec& r, Vec& v) {
   double z[6], x[6], zz = 0.0;
   for (double& e : z) {
@@ -341,8 +344,28 @@ extern "C" {
 int64_t kessler_pc_mc(const double* mean1, const double* a1, const double* mean2, const double* a2,
                       int space, double hbr, double t0, double t1, double h, int64_t n,
                       uint64_t seed, int restrict) {
-  const auto windows = restrict ? search_windows(mean1, a1, mean2, a2, space, hbr, t0, t1)
-                                : std::vector<Window>{{t0, t1}};
+  // Only the encounter at TCA: the window containing t = 0 (another window in [t0, t1] is a
+  // different close approach, such as the second crossing of two orbits half a revolution
+  // later). Trials beyond the bound's range are searched from halfway to the window before it
+  // to halfway to the one after.
+  std::vector<Window> windows{{t0, t1}};
+  double full0 = t0, full1 = t1;
+  if (restrict) {
+    const auto all = search_windows(mean1, a1, mean2, a2, space, hbr, t0, t1);
+    if (!all.empty()) {
+      size_t k = 0;
+      double best = 1e300;
+      for (size_t i = 0; i < all.size(); ++i) {
+        double d = all[i].a > 0 ? all[i].a : (all[i].b < 0 ? -all[i].b : 0.0);
+        if (d < best) best = d, k = i;
+      }
+      windows = {all[k]};
+      if (k > 0) full0 = 0.5 * (all[k - 1].b + all[k].a);
+      if (k + 1 < all.size()) full1 = 0.5 * (all[k].b + all[k + 1].a);
+    } else {
+      windows.clear();
+    }
+  }
   constexpr int64_t BLOCK = 1 << 16;
   int64_t nblocks = (n + BLOCK - 1) / BLOCK, hits = 0;
 #pragma omp parallel for schedule(dynamic, 4) reduction(+ : hits)
@@ -358,7 +381,7 @@ int64_t kessler_pc_mc(const double* mean1, const double* a1, const double* mean2
       o2.init(r, v);
       bool hit = false;
       if (zz > ZCAP * ZCAP) {
-        hit = min_distance(o1, o2, t0, t1, h, hbr) < hbr;
+        hit = min_distance(o1, o2, full0, full1, h, hbr) < hbr;
       } else {
         for (const auto& w : windows)
           if (min_distance(o1, o2, w.a, w.b, std::fmin(h, w.b - w.a), hbr) < hbr) {
@@ -372,8 +395,8 @@ int64_t kessler_pc_mc(const double* mean1, const double* a1, const double* mean2
   return hits;
 }
 
-// The windows search_windows chooses, for inspection: writes up to cap (a, b) pairs and
-// returns how many there are.
+// Every window search_windows finds in [t0, t1] (the Monte Carlo uses only the one at TCA),
+// for inspection: writes up to cap (a, b) pairs and returns how many there are.
 int64_t kessler_pc_mc_windows(const double* mean1, const double* a1, const double* mean2,
                               const double* a2, int space, double hbr, double t0, double t1,
                               double* out, int64_t cap) {

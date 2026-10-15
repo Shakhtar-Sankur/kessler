@@ -91,6 +91,13 @@ def run_nasa(nasa, cdm, hbr, trials, seed):
     return hits.value, rc
 
 
+def half_window(cdm):
+    """The span run_nasa gives CARA's library (a quarter period either side), for kessler too."""
+    _, objs = read_cdm(cdm)
+    (r1, v1, _), (r2, v2, _) = cdm_states(objs[0]), cdm_states(objs[1])
+    return min(orbit_period(r1, v1), orbit_period(r2, v2)) / 4.0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cara", required=True, help="checkout of nasa/CARA_Analysis_Tools")
@@ -112,7 +119,7 @@ def main():
         nh, rc = run_nasa(nasa, cdm, row["HBR_m"], args.trials, -1000 - c)
         tn = time.time() - t
         t = time.time()
-        k = pc_mc_from_cdm(cdm, args.trials, hbr=row["HBR_m"], seed=c)
+        k = pc_mc_from_cdm(cdm, args.trials, hbr=row["HBR_m"], seed=c, window=half_window(cdm))
         tk = time.time() - t
         res = {"case": c, "vrel_mps": row["Vrel_mps"], "trials": args.trials,
                "nasa_hits": nh, "nasa_rc": rc, "nasa_s": tn, "kessler_hits": k["hits"],

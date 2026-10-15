@@ -180,6 +180,7 @@ def max_pc(r1, v1, r2, v2, hbr, sigma_rtn=(100.0, 300.0, 100.0)):
 
 
 CDM_COV6 = ("R", "T", "N", "RDOT", "TDOT", "NDOT")
+MU_EARTH = 3.986004418e14
 
 
 def cdm_states6(obj):
@@ -209,10 +210,19 @@ def _factor(c):
     return np.ascontiguousarray(vec * np.sqrt(np.clip(w, 0.0, None)))
 
 
-def to_equinoctial(r, v, cov):
+def to_equinoctial(r, v, cov, mean_motion=False):
     """Equinoctial elements of a state and its 6x6 covariance mapped to them through the
-    Jacobian of the transformation (central differences)."""
+    Jacobian of the transformation (central differences). With mean_motion=True the first
+    element is the mean motion n (rad/s) instead of the semi-major axis a, the set CARA's
+    papers use (n, af, ag, chi, psi, lambda)."""
     from kessler._native import cart_to_eq
+
+    def cart_to_eq(x, _f=cart_to_eq):
+        el = _f(x)
+        if mean_motion:
+            el[0] = math.sqrt(MU_EARTH / el[0] ** 3)
+        return el
+
     x = np.concatenate([r, v]).astype(float)
     el = cart_to_eq(x)
     jac = np.empty((6, 6))
@@ -226,7 +236,7 @@ def to_equinoctial(r, v, cov):
 
 
 def pc_mc(r1, v1, cov1, r2, v2, cov2, hbr, trials, seed=1, window=None, step=60.0, conf=0.95,
-          restrict=True, space="equinoctial"):
+          restrict=True, space="equinoctial-n"):
     """Monte Carlo probability of collision with two-body motion, the method of NASA CARA's
     SDMC: both states at TCA are drawn from their 6x6 covariances (m, m/s), moved along exact
     Kepler orbits over [-window, window] seconds and a trial is a hit when they pass within hbr.
@@ -235,23 +245,29 @@ def pc_mc(r1, v1, cov1, r2, v2, cov2, hbr, trials, seed=1, window=None, step=60.
     CARA's Pc_SDMC, misses most hits of encounters at a few m/s: on CARA's cases 52 and 53, at
     9 and 11 m/s, it finds none where CARA's Monte Carlo finds 1e-5.)
 
-    The Gaussian is taken to describe the equinoctial elements (space="equinoctial"), as in
-    CARA's SDMC library, or the Cartesian state (space="cartesian"). The two differ when an
-    object's along-track uncertainty is large: a straight-line draw then also tilts its
-    velocity off the orbit.
+    The Gaussian is taken to describe the equinoctial elements with mean motion
+    (space="equinoctial-n", the default: n, af, ag, chi, psi, lambda, the set CARA uses), the
+    same elements with the semi-major axis (space="equinoctial") or the Cartesian state
+    (space="cartesian"). They agree to first order but not in the tails, which decide a small
+    probability: on CARA's case 45 (Pc 7.4e-7) the semi-major-axis form gives 20% more and
+    the Cartesian form none in 100 million trials; on slow encounters a straight-line draw
+    also tilts the velocity off the orbit (case 25: 17% low).
 
-    Each trial is searched only where it can come within hbr (see search_windows in
-    src/mc.cpp); restrict=False searches every trial over the whole window instead.
+    Each trial is searched only where it can come within hbr in the encounter at TCA (see
+    search_windows in src/mc.cpp): a second close approach inside the window, such as two
+    orbits crossing again half a revolution later, is another conjunction and not counted.
+    restrict=False searches every trial over the whole window instead (for checking).
 
     Returns a dict with pc, its Clopper-Pearson interval (lo, hi), hits and trials."""
     from kessler._native import pc_mc_hits
     from scipy.stats import beta
     if window is None:
         window = min(orbit_period(r1, v1), orbit_period(r2, v2)) / 2.0
-    if space == "equinoctial":
-        m1, cov1 = to_equinoctial(r1, v1, cov1)
-        m2, cov2 = to_equinoctial(r2, v2, cov2)
-        code = 1
+    if space in ("equinoctial", "equinoctial-n"):
+        mm = space == "equinoctial-n"
+        m1, cov1 = to_equinoctial(r1, v1, cov1, mm)
+        m2, cov2 = to_equinoctial(r2, v2, cov2, mm)
+        code = 2 if mm else 1
     elif space == "cartesian":
         m1, m2, code = np.concatenate([r1, v1]), np.concatenate([r2, v2]), 0
     else:
