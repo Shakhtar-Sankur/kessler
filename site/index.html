@@ -3,78 +3,203 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>kessler · space traffic audit</title>
-<meta name="description" content="An independent, open-source space-traffic tool: the active satellites in the public catalogue screened against each other every day on open data.">
+<title>kessler — an independent audit of space traffic</title>
+<meta name="description" content="Every active satellite in the public catalogue screened against every other for the next 24 hours, every day, on open data and open-source GPU code checked against NASA. By Sankur Kundu.">
+<meta name="author" content="Sankur Kundu">
 <meta property="og:type" content="website">
-<meta property="og:title" content="kessler: every tracked object in orbit, screened daily">
-<meta property="og:description" content="An independent, open-source space-traffic tool: GPU screening of 32,593 objects in 28 s, checked against NASA and CelesTrak.">
+<meta property="og:title" content="kessler: an independent audit of space traffic, every day">
+<meta property="og:description" content="Open-source GPU screening of the public satellite catalogue, live every day. SGP4 at 125.7 million states a second on a free T4; collision probabilities matching NASA CARA to 1.6e-8.">
 <meta property="og:url" content="https://shakhtar-sankur.github.io/kessler/">
+<meta property="og:image" content="https://shakhtar-sankur.github.io/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='10' fill='%2303050A'/><circle cx='24' cy='24' r='9' fill='none' stroke='%23FF7A1A' stroke-width='3'/><ellipse cx='24' cy='24' rx='19' ry='7' fill='none' stroke='%23E8EDF5' stroke-width='2' transform='rotate(-25 24 24)'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"kessler","description":"Independent, open-source space-traffic auditor: SGP4 on CPU and GPU, all-vs-all conjunction screening, collision probability, daily public screening of the active satellite catalogue.","codeRepository":"https://github.com/Shakhtar-Sankur/kessler","license":"https://www.apache.org/licenses/LICENSE-2.0","url":"https://shakhtar-sankur.github.io/kessler/","author":{"@type":"Person","name":"Sankur Kundu","url":"https://shakhtar-sankur.github.io/","sameAs":["https://github.com/Shakhtar-Sankur","https://www.linkedin.com/in/sankur-kundu"]}}</script>
 <style>
+  /* kessler: mission control. Deep-space black, a single signal orange for alerts and highlights,
+     HUD headlines (Chakra Petch), telemetry in mono. Object colours stay as the globe's legend. */
   :root {
     color-scheme: dark;
-    --bg: #05070d; --panel: #0c111c; --line: #1c2536; --text: #e6ebf5; --muted: #8b96ab;
-    --starlink: #4ea1ff; --payload: #3ddc97; --rocket: #f5b545; --debris: #c0c7d6; --unknown: #8a6cff;
-    --alert: #ff4d5e; --accent: #7cc4ff;
+    --bg: #03050A; --panel: #0A0F18; --panel-2: #0F1622; --line: #1A2333; --line-2: #121A27;
+    --text: #E8EDF5; --muted: #8C97AA; --dim: #5D687B;
+    --signal: #FF7A1A; --accent: #FF7A1A; --ok: #3DDC97;
+    --starlink: #4ea1ff; --payload: #3ddc97; --rocket: #f5b545; --debris: #c0c7d6; --unknown: #8a6cff; --alert: #ff4d5e;
+    --hud: "Chakra Petch", "Manrope", sans-serif; --sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  a { color: var(--accent); }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
-  header { padding: 28px 0 12px; }
-  h1 { margin: 0; font-size: 34px; letter-spacing: -0.02em; }
-  h1 span { color: var(--muted); font-weight: 400; font-size: 18px; margin-left: 10px; }
-  .lede { color: var(--muted); max-width: 760px; margin: 8px 0 0; }
-  h2 { font-size: 21px; margin: 44px 0 6px; letter-spacing: -0.01em; }
-  .sub { color: var(--muted); margin: 0 0 16px; max-width: 820px; }
-  #globe-box { position: relative; height: min(72vh, 680px); border: 1px solid var(--line); border-radius: 14px;
-    overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #0d1630 0%, var(--bg) 70%); margin-top: 18px; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); }
+  body { background-image: radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.5) 50%, transparent 51%), radial-gradient(1px 1px at 72% 9%, rgba(255,255,255,.35) 50%, transparent 51%), radial-gradient(1px 1px at 38% 62%, rgba(255,255,255,.3) 50%, transparent 51%), radial-gradient(1px 1px at 88% 44%, rgba(255,255,255,.4) 50%, transparent 51%), radial-gradient(1px 1px at 22% 84%, rgba(255,255,255,.3) 50%, transparent 51%); background-attachment: fixed; }
+  a { color: var(--signal); text-underline-offset: 3px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 760px) { .wrap { padding: 0 36px; } }
+
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); font: 500 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .bar a { color: var(--text); text-decoration: none; }
+  .bar nav { display: flex; gap: 18px; align-items: center; }
+  .bar nav a { color: var(--muted); }
+  .bar nav a:hover { color: var(--signal); }
+  .live { display: inline-flex; align-items: center; gap: 8px; color: var(--ok); }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  @media (prefers-reduced-motion: no-preference) { .live i { animation: pulse 2s infinite; } @keyframes pulse { 50% { opacity: .35; } } }
+  @media (max-width: 640px) { .bar nav a.hide-s { display: none; } }
+
+  .hero { display: grid; grid-template-columns: 1fr; gap: 26px; padding: 40px 0 26px; }
+  @media (min-width: 980px) { .hero { grid-template-columns: 1.1fr .9fr; gap: 48px; padding: 56px 0 30px; align-items: end; } }
+  .call { font: 600 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--signal); margin: 0 0 14px; }
+  h1 { font: 700 clamp(64px, 11vw, 140px)/.82 var(--hud); text-transform: uppercase; letter-spacing: .01em; margin: 0 0 18px; }
+  h1 small { display: block; font: 600 clamp(20px, 2.6vw, 30px)/1.15 var(--hud); text-transform: none; letter-spacing: 0; color: var(--muted); margin-top: 14px; }
+  .byline { display: flex; align-items: center; gap: 12px; margin: 0 0 20px; }
+  .byline img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--signal); flex: none; }
+  .byline .by { display: block; font-weight: 600; }
+  .byline .when { display: block; font: 11.5px var(--mono); color: var(--dim); }
+  .dek { margin: 0; color: var(--muted); font-size: clamp(17px, 2vw, 19px); max-width: 36rem; }
+  .dek b { color: var(--text); }
+  .readouts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .readouts div { background: var(--panel); padding: 16px 18px; }
+  .readouts b { display: block; font: 600 clamp(28px, 3.4vw, 40px)/1 var(--hud); font-variant-numeric: tabular-nums; }
+  .readouts b em { font-style: normal; color: var(--signal); }
+  .readouts span { display: block; font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+  #globe-box { position: relative; height: min(72vh, 680px); border: 1px solid var(--line); overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #0d1630 0%, var(--bg) 70%); margin-top: 8px; }
+  #globe-box::before, #globe-box::after { content: ""; position: absolute; width: 22px; height: 22px; border: 2px solid var(--signal); pointer-events: none; z-index: 1; }
+  #globe-box::before { left: 8px; top: 8px; border-right: 0; border-bottom: 0; }
+  #globe-box::after { right: 8px; bottom: 8px; border-left: 0; border-top: 0; }
   #globe { width: 100%; height: 100%; display: block; cursor: grab; }
-  .overlay { position: absolute; left: 14px; top: 12px; font-size: 13px; color: var(--muted); pointer-events: none; }
+  .overlay { position: absolute; left: 18px; top: 16px; font: 12px var(--mono); color: var(--muted); pointer-events: none; letter-spacing: .02em; }
   .overlay b { color: var(--text); font-weight: 600; }
-  .legend { position: absolute; left: 14px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
+  .legend { position: absolute; left: 18px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; font: 11.5px var(--mono); color: var(--muted); }
   .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
-  .focus { position: absolute; right: 12px; top: 12px; max-width: 320px; background: rgba(12,17,28,0.92);
-    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: none; }
-  .focus h3 { margin: 0 0 4px; font-size: 14px; }
+  .focus { position: absolute; right: 14px; top: 14px; max-width: 330px; background: rgba(10,15,24,0.94); border: 1px solid var(--signal); padding: 10px 12px; font-size: 13px; display: none; }
+  .focus h3 { margin: 0 0 4px; font: 600 15px var(--hud); }
   .focus .x { float: right; cursor: pointer; color: var(--muted); border: 0; background: none; font-size: 16px; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 14px; }
-  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  .tile .v { font-size: 25px; font-weight: 650; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
-  .tile .k { color: var(--muted); font-size: 12.5px; }
-  .tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  th { color: var(--muted); font-weight: 500; background: var(--panel); position: sticky; top: 0; }
+
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-top: 0; }
+  @media (min-width: 760px) { .tiles { grid-template-columns: repeat(6, 1fr); } }
+  .tile { background: var(--panel); padding: 14px 16px; }
+  .tile .v { font: 600 26px/1.1 var(--hud); font-variant-numeric: tabular-nums; }
+  .tile .k { color: var(--muted); font-size: 12.5px; line-height: 1.35; margin-top: 4px; }
+
+  section { padding: 56px 0 6px; }
+  .sh { display: grid; grid-template-columns: 1fr; gap: 6px 36px; margin: 0 0 22px; }
+  @media (min-width: 980px) { .sh { grid-template-columns: 260px 1fr; } }
+  .code { font: 600 11.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--signal); padding-top: 10px; border-top: 1px solid var(--signal); align-self: start; }
+  h2 { font: 700 clamp(30px, 4.2vw, 48px)/1 var(--hud); text-transform: uppercase; margin: 0 0 10px; letter-spacing: .01em; }
+  .sh p { margin: 0; color: var(--muted); max-width: 46rem; }
+
+  .tablebox { overflow-x: auto; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; font: 13px var(--mono); font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+  th { color: var(--dim); font-weight: 500; background: var(--panel); position: sticky; top: 0; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
   tbody tr { cursor: pointer; }
-  tbody tr:hover, tbody tr.sel { background: #111a2b; }
+  tbody tr:hover, tbody tr.sel { background: var(--panel-2); }
+  tbody tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--signal); }
   td.num, th.num { text-align: right; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 12px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  .card .big { font-size: 28px; font-weight: 650; letter-spacing: -0.01em; }
-  .card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
-  .conclusion { margin-top: 14px; padding: 14px 16px; border-left: 3px solid var(--accent); background: var(--panel); border-radius: 0 10px 10px 0; }
-  .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-  .check { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  .check b { display: block; font-size: 18px; }
-  .check span { color: var(--muted); font-size: 13.5px; }
-  #history { width: 100%; height: 190px; }
-  .note { color: var(--muted); font-size: 13px; }
-  footer { margin: 50px 0 40px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
-  @media (max-width: 600px) { h1 { font-size: 28px; } h1 span { display: block; margin: 4px 0 0; } .focus { left: 12px; right: 12px; max-width: none; top: auto; bottom: 44px; } }
+  #history { width: 100%; height: 190px; display: block; }
+  .histbox { border: 1px solid var(--line); background: var(--panel); padding: 14px; }
+  .note { color: var(--dim); font-size: 13px; margin: 10px 0 0; }
+
+  .why { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; }
+  @media (min-width: 980px) { .why { grid-template-columns: 1fr 1fr; gap: 48px; } }
+  .why .num { font: 700 clamp(64px, 10vw, 128px)/.9 var(--hud); color: var(--signal); font-variant-numeric: tabular-nums; }
+  .why .cap { font: 600 15px var(--mono); color: var(--text); margin-top: 8px; }
+  .why p { color: var(--muted); margin: 0 0 12px; font-size: 17px; }
+  .why p b { color: var(--text); }
+
+  .perf { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  @media (min-width: 760px) { .perf { grid-template-columns: repeat(3, 1fr); } }
+  .perf div { background: var(--panel); padding: 22px; }
+  .perf b { display: block; font: 700 clamp(40px, 5vw, 60px)/1 var(--hud); }
+  .perf b em { font-style: normal; color: var(--signal); font-size: .5em; }
+  .perf span { display: block; color: var(--muted); font-size: 14.5px; margin-top: 10px; }
+  .perf small { display: block; font: 11.5px var(--mono); color: var(--dim); margin-top: 10px; }
+
+  .checks { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 760px) { .checks { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 980px) { .checks { grid-template-columns: repeat(4, 1fr); } }
+  .check { border: 1px solid var(--line); padding: 16px; position: relative; }
+  .check::before { content: "✓ PASS"; position: absolute; right: 12px; top: 12px; font: 600 10.5px var(--mono); color: var(--ok); letter-spacing: .08em; }
+  .check b { display: block; font: 600 26px/1.1 var(--hud); margin-top: 6px; }
+  .check .ag { font: 600 11px var(--mono); color: var(--signal); letter-spacing: .08em; text-transform: uppercase; }
+  .check span { display: block; color: var(--muted); font-size: 13.5px; margin-top: 8px; }
+
+  .held { border: 1px dashed var(--signal); padding: 18px 20px; display: grid; grid-template-columns: 1fr; gap: 8px 24px; }
+  @media (min-width: 980px) { .held { grid-template-columns: 200px 1fr; } }
+  .held b { font: 700 22px var(--hud); color: var(--signal); text-transform: uppercase; }
+  .held p { margin: 0; color: var(--muted); }
+
+  .contrib { list-style: none; margin: 0; padding: 0; counter-reset: c; }
+  .contrib li { counter-increment: c; display: grid; grid-template-columns: 56px 1fr; gap: 4px 18px; padding: 18px 0; border-top: 1px solid var(--line); }
+  @media (min-width: 980px) { .contrib li { grid-template-columns: 90px 300px 1fr; gap: 28px; } }
+  .contrib li::before { content: "0" counter(c); font: 700 32px/1 var(--hud); color: var(--signal); grid-row: span 2; }
+  @media (min-width: 980px) { .contrib li::before { grid-row: auto; } }
+  .contrib h3 { margin: 0; font: 700 22px/1.15 var(--hud); text-transform: uppercase; }
+  .contrib p { margin: 0; color: var(--muted); font-size: 15.5px; }
+  .contrib p b { color: var(--text); }
+
+  .press { display: grid; grid-template-columns: 1fr; gap: 24px; }
+  @media (min-width: 980px) { .press { grid-template-columns: 1.4fr 1fr; gap: 40px; } }
+  .facts { margin: 0; padding: 0; list-style: none; }
+  .facts li { padding: 12px 0 12px 30px; border-top: 1px solid var(--line); position: relative; font-size: 16.5px; }
+  .facts li::before { content: "▸"; position: absolute; left: 4px; top: 11px; color: var(--signal); }
+  .facts .lv { font: 600 10px var(--mono); color: var(--ok); letter-spacing: .08em; margin-left: 6px; vertical-align: 2px; }
+  .kit { align-self: start; background: var(--signal); color: #120800; padding: 20px; }
+  .kit h3 { margin: 0 0 8px; font: 700 26px/1 var(--hud); text-transform: uppercase; }
+  .kit p { margin: 0 0 10px; font-size: 15px; }
+  .kit a { color: #120800; font-weight: 700; }
+  .proof { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
+  @media (min-width: 760px) { .proof { grid-template-columns: repeat(3, 1fr); } }
+  .proof a { display: block; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--signal); color: var(--text); text-decoration: none; }
+  .proof a:hover { background: var(--panel-2); }
+  .proof small { display: block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--signal); margin-bottom: 6px; }
+  .proof span { display: block; font-weight: 700; font-size: 16.5px; }
+  .proof em { display: block; font-style: normal; color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+  .cite { position: relative; margin-top: 22px; }
+  .cite pre { margin: 0; background: var(--panel); border: 1px solid var(--line); color: var(--muted); padding: 16px 18px; font: 12px/1.6 var(--mono); overflow-x: auto; }
+  .cite button { position: absolute; top: 8px; right: 8px; background: var(--signal); color: #120800; border: 0; font: 600 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; cursor: pointer; }
+  .author { display: grid; grid-template-columns: 72px 1fr; gap: 18px; border-top: 1px solid var(--signal); padding-top: 22px; }
+  .author img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--signal); }
+  .author h3 { margin: 0; font: 700 30px/1 var(--hud); text-transform: uppercase; }
+  .author .role { font: 11.5px var(--mono); color: var(--dim); letter-spacing: .06em; text-transform: uppercase; margin: 6px 0 10px; }
+  .author p { margin: 0 0 10px; color: var(--muted); max-width: 48rem; }
+  .author .links { display: flex; flex-wrap: wrap; gap: 8px 16px; font: 500 12px var(--mono); }
+  footer { margin: 56px 0 40px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; display: grid; grid-template-columns: 1fr; gap: 10px 40px; }
+  @media (min-width: 980px) { footer { grid-template-columns: 2fr 1fr; } }
+  footer p { margin: 0; }
+  footer b { display: block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+  @media (max-width: 600px) { .focus { left: 12px; right: 12px; max-width: none; top: auto; bottom: 44px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>kessler <span>an independent auditor of space traffic</span></h1>
-    <p class="lede">Every tracked object in Earth orbit, screened against every other for the next 24 hours, every day, with open-source code
-      checked against NASA and CelesTrak. And a test of what public data can say about Starlink's collision-avoidance reports.</p>
-  </header>
+  <div class="bar">
+    <a href="../">Sankur Kundu</a>
+    <nav>
+      <span class="live"><i></i><span id="status">live · daily</span></span>
+      <a class="hide-s" href="https://github.com/Shakhtar-Sankur/kessler" rel="noreferrer">Code</a>
+      <a class="hide-s" href="#checks">Validation</a>
+    </nav>
+  </div>
+
+  <div class="hero">
+    <div>
+      <p class="call">kessler · independent space-traffic audit</p>
+      <h1>Kessler<small>Every active satellite, screened against every other, every day.</small></h1>
+      <p class="byline"><img src="../avatar.jpg" alt="" width="42" height="42"><span><span class="by">Built and run by Sankur Kundu</span><span class="when">Open source · running daily on GitHub Actions since October 2026</span></span></p>
+      <p class="dek">Operators report how often their satellites dodge each other, and <b>nobody outside can check those numbers</b>. kessler is an open-source auditor built to check them from public data: a GPU orbit propagator, all-vs-all collision screening and collision probability, each validated against the reference.</p>
+    </div>
+    <div class="readouts" id="readouts">
+      <div><b>125.7<em>M/s</em></b><span>Orbit states propagated per second on one free T4 GPU, 73× the reference library</span></div>
+      <div><b>16.4<em>s</em></b><span>To screen 24 hours of every active satellite against every other on a T4; 177 s on 4 CPU cores</span></div>
+      <div><b>1.6<em>e-8</em></b><span>Largest relative difference from NASA CARA's collision probabilities, 53 real conjunctions</span></div>
+      <div><b>0<em> missed</em></b><span>Approaches missed against brute-force screening of every pair at every second</span></div>
+    </div>
+  </div>
 
   <div id="globe-box">
-    <canvas id="globe" aria-label="3D globe with every tracked object"></canvas>
+    <canvas id="globe" aria-label="3D globe with every active satellite in the public catalogue"></canvas>
     <div class="overlay" id="overlay">Loading the latest screening…</div>
     <div class="focus" id="focus"></div>
     <div class="legend">
@@ -85,38 +210,144 @@
       <span><i class="dot" style="background:var(--alert)"></i>Closest approaches</span>
     </div>
   </div>
-
   <div class="tiles" id="tiles"></div>
 
-  <h2>Closest approaches in the next 24 hours</h2>
-  <p class="sub">From public orbits, accurate to about a kilometre: these are screening results, not predictions of collisions.
-    The worst-case probability is Alfano's maximum for a 10 m combined radius, as CelesTrak's SOCRATES reports it. Select a row to see both orbits.</p>
-  <div class="tablebox"><table>
-    <thead><tr><th>#</th><th>Objects</th><th class="num">Distance</th><th class="num">Speed</th><th>Time (UTC)</th><th class="num">Worst-case P</th></tr></thead>
-    <tbody id="rows"></tbody>
-  </table></div>
+  <section id="today" aria-labelledby="today-h">
+    <div class="sh">
+      <div class="code">01 · Today</div>
+      <div><h2 id="today-h">Closest approaches, next 24 hours</h2>
+      <p>From public orbits accurate to about a kilometre: screening results, not predictions of collisions. The worst-case probability is Alfano's maximum for a 10 m combined radius, as CelesTrak's SOCRATES reports it. Select a row to see both orbits on the globe.</p></div>
+    </div>
+    <div class="tablebox"><table>
+      <thead><tr><th>#</th><th>Objects</th><th class="num">Distance</th><th class="num">Speed</th><th>Time (UTC)</th><th class="num">Worst-case P</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div class="histbox" style="margin-top:16px">
+      <div style="font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Approaches closer than 1 km, per daily screening</div>
+      <svg id="history" role="img" aria-label="Approaches closer than 1 km per day"></svg>
+    </div>
+  </section>
 
-  <h2>Every day</h2>
-  <p class="sub">Approaches closer than 1 km found by each day's screening.</p>
-  <svg id="history" role="img" aria-label="Approaches closer than 1 km per day"></svg>
+  <section id="why" aria-labelledby="why-h">
+    <div class="sh">
+      <div class="code">02 · Why it matters</div>
+      <div><h2 id="why-h">Trust, but verify</h2>
+      <p>Low Earth orbit is the busiest it has ever been, and the only collision-avoidance numbers anyone sees are the ones operators publish about themselves.</p></div>
+    </div>
+    <div class="why">
+      <div><div class="num">207,152</div><div class="cap">collision-avoidance maneuvers SpaceX reported for Starlink, Dec 2025 – May 2026</div></div>
+      <div>
+        <p>Starlink satellites maneuver automatically whenever the probability of a collision passes 3 in 10 million. <b>Nobody outside SpaceX can check how often that happens.</b></p>
+        <p>kessler is building the tools to do it from public data: screen every pair, compute the probabilities, and detect maneuvers in public orbit histories, then compare with what operators report to their regulator.</p>
+      </div>
+    </div>
+  </section>
 
-  <h2>The audit</h2>
-  <p class="sub">kessler's audit of Starlink's collision-avoidance reports is withheld while approval to publish analyses of Space-Track data is requested, as Space-Track's user agreement requires. <a href="https://github.com/Shakhtar-Sankur/kessler#m4-how-often-starlink-satellites-maneuver-seen-from-public-data">Method and code</a>.</p>
+  <section id="engine" aria-labelledby="engine-h">
+    <div class="sh">
+      <div class="code">03 · Engineering</div>
+      <div><h2 id="engine-h">The whole sky on a free GPU</h2>
+      <p>One C++ propagator compiled for CPU and CUDA, and a screening method that provably misses nothing. Measured on Kaggle's free Tesla T4.</p></div>
+    </div>
+    <div class="perf">
+      <div><b>125.7M<em> states/s</em></b><span>SGP4 for 16,695 objects at every minute of a day, 24 million states, in 191 ms of kernel time.</span><small>73× python-sgp4, which wraps Vallado's reference C++</small></div>
+      <div><b>16.4<em> s</em></b><span>All-vs-all screening of every active satellite for 24 hours, every pair closer than 5 km.</span><small>GPU and CPU find identical approaches to the last digit</small></div>
+      <div><b>27.7<em> s</em></b><span>The same screening for the full public catalogue of 32,593 objects, debris included.</span><small>speed is a property of the software; that run's results are withheld (below)</small></div>
+    </div>
+  </section>
 
-  <h2>Checked against</h2>
-  <div class="checks">
-    <div class="check"><b>1e-10 km</b><span>SGP4 on CPU and GPU against the reference implementation, over the whole catalogue</span></div>
-    <div class="check"><b>Nothing missed</b><span>screening against brute force (every pair, every second); GPU results identical to CPU</span></div>
-    <div class="check"><b>0.24 m median</b><span>CelesTrak SOCRATES's 100 closest conjunctions, all reproduced (time within 15.5 ms)</span></div>
-    <div class="check"><b>1.6e-8</b><span>largest relative difference from NASA CARA's collision probabilities, 53 real conjunctions</span></div>
-  </div>
+  <section id="checks" aria-labelledby="checks-h">
+    <div class="sh">
+      <div class="code">04 · Validation</div>
+      <div><h2 id="checks-h">Checked against the reference</h2>
+      <p>Every component is tested against an independent implementation, and the tests run on every push.</p></div>
+    </div>
+    <div class="checks">
+      <div class="check"><span class="ag">vs Vallado reference SGP4</span><b>2.7e-12 km</b><span>Largest position difference on all 33 official verification cases, deep-space and decaying orbits included.</span></div>
+      <div class="check"><span class="ag">vs the whole catalogue</span><b>7.1e-10 km</b><span>Every active object at six times from −1 to +7 days: 100,170 states, zero error-code mismatches.</span></div>
+      <div class="check"><span class="ag">vs brute force</span><b>0 missed · 0 extra</b><span>47,080 approaches across four tests, every pair at every second, up to the whole catalogue with deep space.</span></div>
+      <div class="check"><span class="ag">vs NASA CARA</span><b>1.6e-8</b><span>Largest relative difference in collision probability over 106 values from 53 real conjunctions, at the precision of CARA's own quadrature.</span></div>
+    </div>
+    <div class="held" style="margin-top:16px">
+      <b>Withheld, on purpose</b>
+      <p>The audit of Starlink's maneuver reports and the results of the full-catalogue run use Space-Track.org data, whose user agreement requires approval before analyses are published. Approval has been requested from the 18th Space Defense Squadron; until then the results stay private and the code and method stay public, so anyone with their own access can reproduce them. <a href="https://github.com/Shakhtar-Sankur/kessler#m4-how-often-starlink-satellites-maneuver-seen-from-public-data">Method and code</a>.</p>
+    </div>
+  </section>
+
+  <section id="new" aria-labelledby="new-h">
+    <div class="sh">
+      <div class="code">05 · What kessler adds</div>
+      <div><h2 id="new-h">An open, independent check</h2>
+      <p>Built so that anyone, not only operators and governments, can see the traffic in orbit and verify what is reported about it.</p></div>
+    </div>
+    <ol class="contrib">
+      <li><h3>Every pair, every day, in public</h3><p>A daily screening of the whole active catalogue, <b>including the Starlink–Starlink pairs</b> that CelesTrak's SOCRATES leaves out, published as a live globe and table.</p></li>
+      <li><h3>GPU propagation and screening</h3><p>SGP4 at <b>125.7 million states a second</b> on a free GPU, and a grid-based all-vs-all screen proven against brute force, with GPU results identical to CPU.</p></li>
+      <li><h3>Collision probability to NASA's precision</h3><p>Foster's 2D probability in logarithms, reading standard Conjunction Data Messages, matching <b>NASA CARA to 1.6e-8</b> on 53 real conjunctions.</p></li>
+      <li><h3>A maneuver audit method</h3><p>Maneuver detection from public orbit histories, tested on debris that cannot maneuver, built to compare with operators' reports to the FCC once publication is approved.</p></li>
+    </ol>
+    <div class="proof">
+      <a href="https://github.com/Shakhtar-Sankur/kessler" rel="noreferrer"><small>Open source</small><span>Code, method and tests</span><em>C++/CUDA and Python; every number from a script in the repository.</em></a>
+      <a href="https://github.com/Shakhtar-Sankur/kessler/actions" rel="noreferrer"><small>Running</small><span>Daily screening on GitHub Actions</span><em>05:41 UTC every morning; derived results only, never element sets.</em></a>
+      <a href="#cite"><small>Cite</small><span>Software citation</span><em>Free to use and reproduce under its licence.</em></a>
+    </div>
+  </section>
+
+  <section id="press" aria-labelledby="press-h">
+    <div class="sh">
+      <div class="code">06 · For journalists</div>
+      <div><h2 id="press-h">The story in five facts</h2>
+      <p>Free to quote with credit to “Sankur Kundu, kessler”. Facts marked live are recomputed every morning from CelesTrak's public catalogue.</p></div>
+    </div>
+    <div class="press">
+      <ul class="facts" id="facts">
+        <li>SpaceX reported <b>207,152 collision-avoidance maneuvers</b> by Starlink satellites in six months (Dec 2025 – May 2026); nobody outside SpaceX can verify the figure today.</li>
+        <li id="fact-live1">The latest daily screening is loading…</li>
+        <li id="fact-live2"></li>
+        <li>An open-source program screens <b>every active satellite against every other for a full day in 16.4 seconds</b> on a free cloud GPU.</li>
+        <li>Its collision probabilities match <b>NASA's own tool to within 1.6 parts in 100 million</b> on 53 real conjunctions.</li>
+      </ul>
+      <div class="kit">
+        <h3>Contact</h3>
+        <p>Sankur Kundu, independent researcher, Bhubaneswar, India. Happy to explain the method or run a check for your story.</p>
+        <p><a href="mailto:sankur.kundu.tw@gmail.com">sankur.kundu.tw@gmail.com</a></p>
+        <p style="margin:0"><a href="https://www.linkedin.com/in/sankur-kundu" rel="noreferrer">LinkedIn</a> · <a href="https://github.com/Shakhtar-Sankur/kessler" rel="noreferrer">GitHub</a></p>
+      </div>
+    </div>
+    <div class="cite" id="cite">
+      <button type="button" id="copy">Copy</button>
+<pre id="bib">@software{kundu2026kessler,
+  author = {Kundu, Sankur},
+  title  = {kessler: an independent, open-source auditor of space traffic},
+  year   = {2026},
+  url    = {https://github.com/Shakhtar-Sankur/kessler}
+}</pre>
+    </div>
+  </section>
+
+  <section aria-label="About the author">
+    <div class="author">
+      <img src="../avatar.jpg" alt="Sankur Kundu" width="72" height="72">
+      <div>
+        <h3>Sankur Kundu</h3>
+        <p class="role">ML systems engineer &amp; independent researcher · Bhubaneswar, India</p>
+        <p>Builds GPU and distributed systems, and uses them on public problems. Also the author of <a href="../token-tax/">lipi</a>, a tokenizer that needs fewer tokens than GPT-4o's and Gemini's in 23 of 24 Indian languages; <a href="../babelguard/">Babelguard</a>, an open early-warning system for scams across languages; and <a href="../ratchet/">ratchet</a>, RL post-training from scratch. Pull requests to PyTorch, vLLM and Meta's ExecuTorch, the last approved by two maintainers.</p>
+        <div class="links"><a href="../">Portfolio</a><a href="https://github.com/Shakhtar-Sankur" rel="noreferrer">GitHub</a><a href="https://www.linkedin.com/in/sankur-kundu" rel="noreferrer">LinkedIn</a></div>
+      </div>
+    </div>
+  </section>
 
   <footer>
-    Built by <a href="https://github.com/Shakhtar-Sankur">Sankur Kundu</a> · <a href="https://github.com/Shakhtar-Sankur/kessler">source code and method</a> ·
-    Orbits: CelesTrak public data (active satellites); this page shows derived results only. <span id="meta"></span>
+    <p><b>Data</b>Orbits: CelesTrak's public catalogue of active satellites, downloaded each morning; this page shows derived results only and never republishes element sets. NASA CARA test data: nasa/CARA_Analysis_Tools at a pinned commit, not redistributed. Engineering figures: Kaggle, one Tesla T4. <span id="meta"></span></p>
+    <p><b>Credit</b>© 2026 Sankur Kundu. Code under the repository's licence.</p>
   </footer>
 </div>
 
+<script>
+document.getElementById("copy").addEventListener("click", function () {
+  var b = this; try { navigator.clipboard.writeText(document.getElementById("bib").textContent).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); }); } catch (e) {}
+});
+</script>
 <script src="vendor/three.min.js"></script>
 <script src="vendor/OrbitControls.js"></script>
 <script src="vendor/topojson-client.min.js"></script>
@@ -130,7 +361,7 @@
   // ---- data and text (shown even without WebGL)
   let data;
   try { data = await (await fetch("data/latest.json", { cache: "no-cache" })).json(); }
-  catch (e) { $("overlay").textContent = "The latest screening could not be loaded."; return; }
+  catch (e) { $("overlay").textContent = "The latest screening could not be loaded."; $("fact-live1").textContent = "The latest daily screening could not be loaded."; return; }
   const S = data.summary;
   const when = S.start.slice(0, 16).replace("T", " ") + " UTC";
   const starlinkShare = S.approaches ? Math.round(100 * (S.starlink_starlink + S.starlink_other) / S.approaches) : 0;
@@ -150,6 +381,9 @@
     <td class="num">${fmt(c.miss_m)} m</td><td class="num">${c.vrel_km_s.toFixed(2)} km/s</td>
     <td>${c.tca.slice(5, 16).replace("T", " ")}</td><td class="num">${pcText(c.worst_case_pc_10m)}</td></tr>`).join("");
   $("meta").textContent = `Latest screening: ${when}, ${S.source}.`;
+  $("status").textContent = `live · ${S.date}`;
+  $("fact-live1").innerHTML = `On ${S.date}, kessler found <b>${fmt(S.approaches)} close approaches under ${S.dmax_km} km</b> among ${fmt(S.objects)} active satellites in 24 hours, <b>${fmt(S.below_1km)} under 1 km</b> and ${fmt(S.below_200m)} under 200 m. <span class="lv">LIVE</span>`;
+  $("fact-live2").innerHTML = `<b>${starlinkShare}% of those approaches involve a Starlink satellite</b>, and ${Math.round(100 * S.starlink_starlink / Math.max(1, S.approaches))}% are between two Starlink satellites, pairs that the long-running public service SOCRATES does not screen. <span class="lv">LIVE</span>`;
   $("overlay").innerHTML = `<b>${fmt(S.objects)}</b> objects at ${when} · drag to turn, scroll to zoom`;
 
   fetch("data/history.csv", { cache: "no-cache" }).then(r => r.text()).then(text => {
