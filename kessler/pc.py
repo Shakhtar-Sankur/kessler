@@ -177,3 +177,96 @@ def max_pc(r1, v1, r2, v2, hbr, sigma_rtn=(100.0, 300.0, 100.0)):
         neg_log_pc, bounds=(math.log(k0) - 12.0, math.log(k0) + 6.0), method="bounded",
         options={"xatol": 1e-10})
     return math.exp(-res.fun), math.exp(res.x)
+
+
+CDM_COV6 = ("R", "T", "N", "RDOT", "TDOT", "NDOT")
+
+
+def cdm_states6(obj):
+    """Inertial position (m), velocity (m/s) and 6x6 state covariance (m, m/s) of one CDM
+    object. The CDM gives the lower triangle in the object's radial / transverse / normal
+    frame; it is rotated to inertial axes with the same block rotation CARA uses."""
+    r, v, _ = cdm_states(obj)
+    c = np.zeros((6, 6))
+    for i, a in enumerate(CDM_COV6):
+        for j, b in enumerate(CDM_COV6[: i + 1]):
+            c[i, j] = c[j, i] = float(obj[f"C{a}_{b}"])
+    m = rtn_basis(r, v)
+    rot = np.zeros((6, 6))
+    rot[:3, :3] = rot[3:, 3:] = m
+    return r, v, rot @ c @ rot.T
+
+
+def orbit_period(r, v, mu=3.986004418e14):
+    a = 1.0 / (2.0 / np.linalg.norm(r) - (v @ v) / mu)
+    return 2.0 * math.pi * math.sqrt(a ** 3 / mu) if a > 0 else math.inf
+
+
+def _factor(c):
+    """A with A A^T = c; negative eigenvalues (covariances that are not quite positive
+    semidefinite, which real CDMs contain) are set to zero."""
+    w, vec = np.linalg.eigh(np.asarray(c, dtype=float))
+    return np.ascontiguousarray(vec * np.sqrt(np.clip(w, 0.0, None)))
+
+
+def to_equinoctial(r, v, cov):
+    """Equinoctial elements of a state and its 6x6 covariance mapped to them through the
+    Jacobian of the transformation (central differences)."""
+    from kessler._native import cart_to_eq
+    x = np.concatenate([r, v]).astype(float)
+    el = cart_to_eq(x)
+    jac = np.empty((6, 6))
+    for j, d in enumerate((1.0, 1.0, 1.0, 1e-3, 1e-3, 1e-3)):
+        dx = np.zeros(6)
+        dx[j] = d
+        diff = cart_to_eq(x + dx) - cart_to_eq(x - dx)
+        diff[5] = (diff[5] + math.pi) % (2.0 * math.pi) - math.pi
+        jac[:, j] = diff / (2.0 * d)
+    return el, jac @ np.asarray(cov, dtype=float) @ jac.T
+
+
+def pc_mc(r1, v1, cov1, r2, v2, cov2, hbr, trials, seed=1, window=None, step=60.0, conf=0.95,
+          restrict=True, space="equinoctial"):
+    """Monte Carlo probability of collision with two-body motion, the method of NASA CARA's
+    SDMC: both states at TCA are drawn from their 6x6 covariances (m, m/s), moved along exact
+    Kepler orbits over [-window, window] seconds and a trial is a hit when they pass within hbr.
+    The default window is half the shorter orbital period either side of TCA: one revolution,
+    the whole encounter however slow, and not the next one. (A quarter period, the default of
+    CARA's Pc_SDMC, misses most hits of encounters at a few m/s: on CARA's cases 52 and 53, at
+    9 and 11 m/s, it finds none where CARA's Monte Carlo finds 1e-5.)
+
+    The Gaussian is taken to describe the equinoctial elements (space="equinoctial"), as in
+    CARA's SDMC library, or the Cartesian state (space="cartesian"). The two differ when an
+    object's along-track uncertainty is large: a straight-line draw then also tilts its
+    velocity off the orbit.
+
+    Each trial is searched only where it can come within hbr (see search_windows in
+    src/mc.cpp); restrict=False searches every trial over the whole window instead.
+
+    Returns a dict with pc, its Clopper-Pearson interval (lo, hi), hits and trials."""
+    from kessler._native import pc_mc_hits
+    from scipy.stats import beta
+    if window is None:
+        window = min(orbit_period(r1, v1), orbit_period(r2, v2)) / 2.0
+    if space == "equinoctial":
+        m1, cov1 = to_equinoctial(r1, v1, cov1)
+        m2, cov2 = to_equinoctial(r2, v2, cov2)
+        code = 1
+    elif space == "cartesian":
+        m1, m2, code = np.concatenate([r1, v1]), np.concatenate([r2, v2]), 0
+    else:
+        raise ValueError(f"unknown space {space!r}")
+    hits = pc_mc_hits(m1, _factor(cov1), m2, _factor(cov2), hbr, -window, window, step,
+                      int(trials), seed, restrict, code)
+    a = 1.0 - conf
+    lo = beta.ppf(a / 2, hits, trials - hits + 1) if hits > 0 else 0.0
+    hi = beta.ppf(1 - a / 2, hits + 1, trials - hits) if hits < trials else 1.0
+    return {"pc": hits / trials, "lo": float(lo), "hi": float(hi), "hits": int(hits),
+            "trials": int(trials)}
+
+
+def pc_mc_from_cdm(text, trials, hbr=None, **kw):
+    head, objs = read_cdm(text)
+    r1, v1, c1 = cdm_states6(objs[0])
+    r2, v2, c2 = cdm_states6(objs[1])
+    return pc_mc(r1, v1, c1, r2, v2, c2, hbr if hbr is not None else head["HBR"], trials, **kw)

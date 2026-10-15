@@ -4,3 +4,4 @@ __pycache__/
 *.o
 build/
 data/
+bench/.cara_cache/

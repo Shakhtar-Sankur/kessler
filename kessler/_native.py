@@ -64,3 +64,53 @@ class Elsets:
         err = np.empty(k, dtype=np.int32)
         _lib.kessler_propagate_at(_ptr(self.buf), _ptr(idx), _ptr(t), k, _ptr(r), _ptr(v), _ptr(err))
         return r, v, err
+
+
+_d = ctypes.c_double
+_lib.kessler_pc_mc.argtypes = [_p, _p, _p, _p, ctypes.c_int, _d, _d, _d, _d, _i64, ctypes.c_uint64,
+                               ctypes.c_int]
+_lib.kessler_pc_mc_windows.argtypes = [_p, _p, _p, _p, ctypes.c_int, _d, _d, _d, _p, _i64]
+_lib.kessler_cart_to_eq.argtypes = [_p, _p]
+_lib.kessler_eq_to_cart.argtypes = [_p, _p]
+_lib.kessler_pc_mc_windows.restype = _i64
+_lib.kessler_pc_mc.restype = _i64
+_lib.kessler_kepler.argtypes = [_p, _d, _p]
+
+
+def pc_mc_hits(mean1, a1, mean2, a2, hbr, t0, t1, step, trials, seed, restrict=True, space=0):
+    """Monte Carlo trials of two-body motion (src/mc.cpp); returns the number of hits.
+    space 0: mean and factor in Cartesian (m, m/s); space 1: in equinoctial elements."""
+    arrs = [np.ascontiguousarray(x, dtype=np.float64) for x in (mean1, a1, mean2, a2)]
+    return _lib.kessler_pc_mc(*(_ptr(x) for x in arrs), space, hbr, t0, t1, step, trials, seed,
+                              int(restrict))
+
+
+def pc_mc_windows(mean1, a1, mean2, a2, hbr, t0, t1, space=0):
+    """The time windows the Monte Carlo searches, as a list of (start, end) in seconds."""
+    arrs = [np.ascontiguousarray(x, dtype=np.float64) for x in (mean1, a1, mean2, a2)]
+    out = np.empty(2 * 4096)
+    k = _lib.kessler_pc_mc_windows(*(_ptr(x) for x in arrs), space, hbr, t0, t1, _ptr(out), 4096)
+    return [tuple(out[2 * i:2 * i + 2]) for i in range(min(k, 4096))]
+
+
+def kepler(rv0, t):
+    """State (m, m/s) after t seconds along a two-body orbit."""
+    rv0 = np.ascontiguousarray(rv0, dtype=np.float64)
+    out = np.empty(6)
+    _lib.kessler_kepler(_ptr(rv0), t, _ptr(out))
+    return out
+
+
+def cart_to_eq(rv):
+    """Equinoctial elements (a [m], h, k, p, q, mean longitude [rad]) of a state (m, m/s)."""
+    rv = np.ascontiguousarray(rv, dtype=np.float64)
+    out = np.empty(6)
+    _lib.kessler_cart_to_eq(_ptr(rv), _ptr(out))
+    return out
+
+
+def eq_to_cart(el):
+    el = np.ascontiguousarray(el, dtype=np.float64)
+    out = np.empty(6)
+    _lib.kessler_eq_to_cart(_ptr(el), _ptr(out))
+    return out
