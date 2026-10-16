@@ -109,10 +109,10 @@ def test_nasa_slow_encounter():
     assert abs(z) < 4, (res, row["PcSDMC"])
 
 
-def test_nasa_far_tail_needs_mean_motion_elements():
-    """CARA's case 45 (ICESat-2 and SpaceBEE-114, Pc 7.4e-7 from 2,952 hits in 4 billion trials):
-    with the elements CARA samples (mean motion) the Monte Carlo agrees; with the semi-major
-    axis in their place it is high, with Cartesian states far too low."""
+def test_nasa_far_tail():
+    """CARA's case 45 (ICESat-2 and SpaceBEE-114, Pc 7.4e-7 from 2,952 hits in 4 billion trials),
+    decided by the far tail: with equinoctial elements the Monte Carlo agrees (with Cartesian
+    states it finds no hit; bench/m3_ablations.py)."""
     from test_pc import cara_table, fetch
     from kessler.pc import pc_mc_from_cdm
     row = [r for r in cara_table() if r["Conjunction_ID"].startswith("000043613_conj_000052010")]

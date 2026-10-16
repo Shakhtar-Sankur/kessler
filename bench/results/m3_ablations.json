@@ -1,0 +1,545 @@
+{
+ "sampling": [
+  {
+   "case": 1,
+   "space": "cartesian",
+   "kessler": {
+    "pc": 0.000608,
+    "lo": 0.0005865832839865857,
+    "hi": 0.0006299984155091532,
+    "hits": 3040,
+    "trials": 5000000,
+    "seconds": 2.3582494258880615,
+    "z_vs_nasa": -0.24695479585114166
+   },
+   "nasa_sdmc": {
+    "pc": 0.000611125,
+    "hits": 9778,
+    "trials": 16000000
+   }
+  },
+  {
+   "case": 1,
+   "space": "equinoctial",
+   "kessler": {
+    "pc": 0.0006174,
+    "lo": 0.0005958169936013665,
+    "hi": 0.0006395646679628275,
+    "hits": 3087,
+    "trials": 5000000,
+    "seconds": 2.195873260498047,
+    "z_vs_nasa": 0.4949791410395079
+   },
+   "nasa_sdmc": {
+    "pc": 0.000611125,
+    "hits": 9778,
+    "trials": 16000000
+   }
+  },
+  {
+   "case": 1,
+   "space": "equinoctial-n",
+   "kessler": {
+    "pc": 0.0006126,
+    "lo": 0.0005911017481499921,
+    "hi": 0.0006346799327059032,
+    "hits": 3063,
+    "trials": 5000000,
+    "seconds": 2.284418821334839,
+    "z_vs_nasa": 0.1164582907751722
+   },
+   "nasa_sdmc": {
+    "pc": 0.000611125,
+    "hits": 9778,
+    "trials": 16000000
+   }
+  },
+  {
+   "case": 25,
+   "space": "cartesian",
+   "kessler": {
+    "pc": 0.00012725,
+    "lo": 0.00011643457392444897,
+    "hi": 0.00013879960496424056,
+    "hits": 509,
+    "trials": 4000000,
+    "seconds": 23.820051431655884,
+    "z_vs_nasa": -3.7060640839689314
+   },
+   "nasa_sdmc": {
+    "pc": 0.00015056060606060605,
+    "hits": 9937,
+    "trials": 66000000
+   }
+  },
+  {
+   "case": 25,
+   "space": "equinoctial",
+   "kessler": {
+    "pc": 0.000157,
+    "lo": 0.00014496019152117652,
+    "hi": 0.00016977287484106773,
+    "hits": 628,
+    "trials": 4000000,
+    "seconds": 23.387574434280396,
+    "z_vs_nasa": 1.017993449495342
+   },
+   "nasa_sdmc": {
+    "pc": 0.00015056060606060605,
+    "hits": 9937,
+    "trials": 66000000
+   }
+  },
+  {
+   "case": 25,
+   "space": "equinoctial-n",
+   "kessler": {
+    "pc": 0.0001535,
+    "lo": 0.00014159782157657344,
+    "hi": 0.00016613535938283578,
+    "hits": 614,
+    "trials": 4000000,
+    "seconds": 23.660799980163574,
+    "z_vs_nasa": 0.4649922119661532
+   },
+   "nasa_sdmc": {
+    "pc": 0.00015056060606060605,
+    "hits": 9937,
+    "trials": 66000000
+   }
+  },
+  {
+   "case": 45,
+   "space": "cartesian",
+   "kessler": {
+    "pc": 0.0,
+    "lo": 0.0,
+    "hi": 3.688879386074778e-08,
+    "hits": 0,
+    "trials": 100000000,
+    "seconds": 71.2512595653534,
+    "z_vs_nasa": -8.590695730616831
+   },
+   "nasa_sdmc": {
+    "pc": 7.38e-07,
+    "hits": 2952,
+    "trials": 4000000000
+   }
+  },
+  {
+   "case": 45,
+   "space": "equinoctial",
+   "kessler": {
+    "pc": 7.6e-07,
+    "lo": 5.987936040352687e-07,
+    "hi": 9.51253238668122e-07,
+    "hits": 76,
+    "trials": 100000000,
+    "seconds": 75.11520075798035,
+    "z_vs_nasa": 0.25285695368987354
+   },
+   "nasa_sdmc": {
+    "pc": 7.38e-07,
+    "hits": 2952,
+    "trials": 4000000000
+   }
+  },
+  {
+   "case": 45,
+   "space": "equinoctial-n",
+   "kessler": {
+    "pc": 9.8e-07,
+    "lo": 7.956114401162865e-07,
+    "hi": 1.1943059749577884e-06,
+    "hits": 98,
+    "trials": 100000000,
+    "seconds": 76.70775651931763,
+    "z_vs_nasa": 2.7713769688963565
+   },
+   "nasa_sdmc": {
+    "pc": 7.38e-07,
+    "hits": 2952,
+    "trials": 4000000000
+   }
+  }
+ ],
+ "window": [
+  {
+   "case": 52,
+   "half_window_periods": 0.25,
+   "counted": "encounter at TCA",
+   "period_s": 5716.134844067533,
+   "kessler": {
+    "pc": 0.0,
+    "lo": 0.0,
+    "hi": 4.6110982545307367e-07,
+    "hits": 0,
+    "trials": 8000000,
+    "seconds": 39.066901445388794,
+    "z_vs_nasa": -9.660021795181665
+   },
+   "nasa_sdmc": {
+    "pc": 1.1664367816091955e-05,
+    "hits": 10148,
+    "trials": 870000000
+   }
+  },
+  {
+   "case": 52,
+   "half_window_periods": 0.5,
+   "counted": "encounter at TCA",
+   "period_s": 5716.134844067533,
+   "kessler": {
+    "pc": 1.2625e-05,
+    "lo": 1.0283281246792451e-05,
+    "hi": 1.5340498634444355e-05,
+    "hits": 101,
+    "trials": 8000000,
+    "seconds": 78.91350936889648,
+    "z_vs_nasa": 0.791632363445013
+   },
+   "nasa_sdmc": {
+    "pc": 1.1664367816091955e-05,
+    "hits": 10148,
+    "trials": 870000000
+   }
+  },
+  {
+   "case": 52,
+   "half_window_periods": 1.0,
+   "counted": "encounter at TCA",
+   "period_s": 5716.134844067533,
+   "kessler": {
+    "pc": 1.7e-05,
+    "lo": 1.4263076538683305e-05,
+    "hi": 2.0109065575680624e-05,
+    "hits": 136,
+    "trials": 8000000,
+    "seconds": 159.86627626419067,
+    "z_vs_nasa": 4.389469268337086
+   },
+   "nasa_sdmc": {
+    "pc": 1.1664367816091955e-05,
+    "hits": 10148,
+    "trials": 870000000
+   }
+  },
+  {
+   "case": 52,
+   "half_window_periods": 1.0,
+   "counted": "every encounter in the window",
+   "period_s": 5716.134844067533,
+   "kessler": {
+    "pc": 1.7e-05,
+    "lo": 1.4263076538683305e-05,
+    "hi": 2.0109065575680624e-05,
+    "hits": 136,
+    "trials": 8000000,
+    "seconds": 158.09514236450195,
+    "z_vs_nasa": 4.389469268337086
+   },
+   "nasa_sdmc": {
+    "pc": 1.1664367816091955e-05,
+    "hits": 10148,
+    "trials": 870000000
+   }
+  },
+  {
+   "case": 53,
+   "half_window_periods": 0.25,
+   "counted": "encounter at TCA",
+   "period_s": 5715.992137437013,
+   "kessler": {
+    "pc": 0.0,
+    "lo": 0.0,
+    "hi": 4.6110982545307367e-07,
+    "hits": 0,
+    "trials": 8000000,
+    "seconds": 38.95209980010986,
+    "z_vs_nasa": -9.032422914880708
+   },
+   "nasa_sdmc": {
+    "pc": 1.0197979797979798e-05,
+    "hits": 10096,
+    "trials": 990000000
+   }
+  },
+  {
+   "case": 53,
+   "half_window_periods": 0.5,
+   "counted": "encounter at TCA",
+   "period_s": 5715.992137437013,
+   "kessler": {
+    "pc": 1.1e-05,
+    "lo": 8.82233071361321e-06,
+    "hi": 1.3552290360446204e-05,
+    "hits": 88,
+    "trials": 8000000,
+    "seconds": 76.75785565376282,
+    "z_vs_nasa": 0.7072792534798944
+   },
+   "nasa_sdmc": {
+    "pc": 1.0197979797979798e-05,
+    "hits": 10096,
+    "trials": 990000000
+   }
+  },
+  {
+   "case": 53,
+   "half_window_periods": 1.0,
+   "counted": "encounter at TCA",
+   "period_s": 5715.992137437013,
+   "kessler": {
+    "pc": 1.525e-05,
+    "lo": 1.2664218877274304e-05,
+    "hi": 1.820849429623682e-05,
+    "hits": 122,
+    "trials": 8000000,
+    "seconds": 158.8489842414856,
+    "z_vs_nasa": 4.44781733805437
+   },
+   "nasa_sdmc": {
+    "pc": 1.0197979797979798e-05,
+    "hits": 10096,
+    "trials": 990000000
+   }
+  },
+  {
+   "case": 53,
+   "half_window_periods": 1.0,
+   "counted": "every encounter in the window",
+   "period_s": 5715.992137437013,
+   "kessler": {
+    "pc": 1.525e-05,
+    "lo": 1.2664218877274304e-05,
+    "hi": 1.820849429623682e-05,
+    "hits": 122,
+    "trials": 8000000,
+    "seconds": 159.1451644897461,
+    "z_vs_nasa": 4.44781733805437
+   },
+   "nasa_sdmc": {
+    "pc": 1.0197979797979798e-05,
+    "hits": 10096,
+    "trials": 990000000
+   }
+  }
+ ],
+ "second_encounter": {
+  "cases_with_more_than_one_window": 25,
+  "per_case": [
+   {
+    "case": 1,
+    "windows": 1
+   },
+   {
+    "case": 2,
+    "windows": 1
+   },
+   {
+    "case": 3,
+    "windows": 1
+   },
+   {
+    "case": 4,
+    "windows": 1
+   },
+   {
+    "case": 5,
+    "windows": 2
+   },
+   {
+    "case": 6,
+    "windows": 1
+   },
+   {
+    "case": 7,
+    "windows": 1
+   },
+   {
+    "case": 8,
+    "windows": 1
+   },
+   {
+    "case": 9,
+    "windows": 1
+   },
+   {
+    "case": 10,
+    "windows": 3
+   },
+   {
+    "case": 11,
+    "windows": 2
+   },
+   {
+    "case": 12,
+    "windows": 1
+   },
+   {
+    "case": 13,
+    "windows": 2
+   },
+   {
+    "case": 14,
+    "windows": 1
+   },
+   {
+    "case": 15,
+    "windows": 1
+   },
+   {
+    "case": 16,
+    "windows": 3
+   },
+   {
+    "case": 17,
+    "windows": 1
+   },
+   {
+    "case": 18,
+    "windows": 3
+   },
+   {
+    "case": 19,
+    "windows": 2
+   },
+   {
+    "case": 20,
+    "windows": 3
+   },
+   {
+    "case": 21,
+    "windows": 3
+   },
+   {
+    "case": 22,
+    "windows": 1
+   },
+   {
+    "case": 23,
+    "windows": 1
+   },
+   {
+    "case": 24,
+    "windows": 1
+   },
+   {
+    "case": 25,
+    "windows": 1
+   },
+   {
+    "case": 26,
+    "windows": 3
+   },
+   {
+    "case": 27,
+    "windows": 1
+   },
+   {
+    "case": 28,
+    "windows": 1
+   },
+   {
+    "case": 29,
+    "windows": 1
+   },
+   {
+    "case": 30,
+    "windows": 1
+   },
+   {
+    "case": 31,
+    "windows": 3
+   },
+   {
+    "case": 32,
+    "windows": 3
+   },
+   {
+    "case": 33,
+    "windows": 3
+   },
+   {
+    "case": 34,
+    "windows": 3
+   },
+   {
+    "case": 35,
+    "windows": 1
+   },
+   {
+    "case": 36,
+    "windows": 1
+   },
+   {
+    "case": 37,
+    "windows": 1
+   },
+   {
+    "case": 38,
+    "windows": 3
+   },
+   {
+    "case": 39,
+    "windows": 3
+   },
+   {
+    "case": 40,
+    "windows": 3
+   },
+   {
+    "case": 41,
+    "windows": 3
+   },
+   {
+    "case": 42,
+    "windows": 3
+   },
+   {
+    "case": 43,
+    "windows": 3
+   },
+   {
+    "case": 44,
+    "windows": 3
+   },
+   {
+    "case": 45,
+    "windows": 3
+   },
+   {
+    "case": 46,
+    "windows": 3
+   },
+   {
+    "case": 47,
+    "windows": 1
+   },
+   {
+    "case": 48,
+    "windows": 3
+   },
+   {
+    "case": 49,
+    "windows": 1
+   },
+   {
+    "case": 50,
+    "windows": 2
+   },
+   {
+    "case": 51,
+    "windows": 1
+   },
+   {
+    "case": 52,
+    "windows": 1
+   },
+   {
+    "case": 53,
+    "windows": 1
+   }
+  ]
+ }
+}

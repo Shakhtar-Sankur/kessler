@@ -213,8 +213,8 @@ def _factor(c):
 def to_equinoctial(r, v, cov, mean_motion=False):
     """Equinoctial elements of a state and its 6x6 covariance mapped to them through the
     Jacobian of the transformation (central differences). With mean_motion=True the first
-    element is the mean motion n (rad/s) instead of the semi-major axis a, the set CARA's
-    papers use (n, af, ag, chi, psi, lambda)."""
+    element is the mean motion n (rad/s) instead of the semi-major axis a:
+    (n, af, ag, chi, psi, lambda)."""
     from kessler._native import cart_to_eq
 
     def cart_to_eq(x, _f=cart_to_eq):
@@ -246,12 +246,12 @@ def pc_mc(r1, v1, cov1, r2, v2, cov2, hbr, trials, seed=1, window=None, step=60.
     9 and 11 m/s, it finds none where CARA's Monte Carlo finds 1e-5.)
 
     The Gaussian is taken to describe the equinoctial elements with mean motion
-    (space="equinoctial-n", the default: n, af, ag, chi, psi, lambda, the set CARA uses), the
-    same elements with the semi-major axis (space="equinoctial") or the Cartesian state
-    (space="cartesian"). They agree to first order but not in the tails, which decide a small
-    probability: on CARA's case 45 (Pc 7.4e-7) the semi-major-axis form gives 20% more and
-    the Cartesian form none in 100 million trials; on slow encounters a straight-line draw
-    also tilts the velocity off the orbit (case 25: 17% low).
+    (space="equinoctial-n", the default: n, af, ag, chi, psi, lambda), the same elements with
+    the semi-major axis (space="equinoctial") or the Cartesian state (space="cartesian"). They
+    agree to first order but not in the tails, which decide a small probability: on CARA's
+    case 45 (Pc 7.4e-7) both equinoctial forms reproduce CARA's value in a billion trials, and
+    the Cartesian form finds none in 100 million; on slow encounters a straight-line draw also
+    tilts the velocity off the orbit (case 25: 15% low). See bench/m3_ablations.py.
 
     Each trial is searched only where it can come within hbr in the encounter at TCA (see
     search_windows in src/mc.cpp): a second close approach inside the window, such as two

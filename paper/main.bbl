@@ -1,0 +1,88 @@
+\begin{thebibliography}{13}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Alfano(2005)]{alfano2005}
+Salvatore Alfano.
+\newblock A numerical implementation of spherical object collision probability.
+\newblock \emph{The Journal of the Astronautical Sciences}, 53\penalty0
+  (1):\penalty0 103--109, 2005.
+
+\bibitem[Blackman and Vigna(2021)]{blackman2021}
+David Blackman and Sebastiano Vigna.
+\newblock Scrambled linear pseudorandom number generators.
+\newblock \emph{ACM Transactions on Mathematical Software}, 47\penalty0 (4),
+  2021.
+
+\bibitem[Broucke and Cefola(1972)]{broucke1972}
+R.~A. Broucke and P.~J. Cefola.
+\newblock On the equinoctial orbit elements.
+\newblock \emph{Celestial Mechanics}, 5\penalty0 (3):\penalty0 303--310, 1972.
+
+\bibitem[Chan(2008)]{chan2008}
+F.~Kenneth Chan.
+\newblock \emph{Spacecraft Collision Probability}.
+\newblock The Aerospace Press, El Segundo, CA, 2008.
+
+\bibitem[Clopper and Pearson(1934)]{clopper1934}
+C.~J. Clopper and E.~S. Pearson.
+\newblock The use of confidence or fiducial limits illustrated in the case of
+  the binomial.
+\newblock \emph{Biometrika}, 26\penalty0 (4):\penalty0 404--413, 1934.
+
+\bibitem[Coppola(2012)]{coppola2012}
+Vincent~T. Coppola.
+\newblock Including velocity uncertainty in the probability of collision
+  between space objects.
+\newblock In \emph{AAS/AIAA Space Flight Mechanics Meeting}, 2012.
+\newblock AAS 12-247.
+
+\bibitem[Foster and Estes(1992)]{foster1992}
+J.~L. Foster and H.~S. Estes.
+\newblock A parametric analysis of orbital debris collision probability and
+  maneuver rate for space vehicles.
+\newblock Technical Report JSC-25898, NASA Johnson Space Center, 1992.
+
+\bibitem[Hall(2021)]{hall2021}
+Doyle~T. Hall.
+\newblock Expected collision rates for tracked satellites.
+\newblock \emph{Journal of Spacecraft and Rockets}, 58\penalty0 (3), 2021.
+
+\bibitem[Hall et~al.(2018)Hall, Casali, Johnson, Skrehart, and Baars]{hall2018}
+Doyle~T. Hall, Stephen~J. Casali, Lauren~C. Johnson, Brent~B. Skrehart, and
+  Luis~G. Baars.
+\newblock High fidelity collision probabilities estimated using brute force
+  {Monte Carlo} simulations.
+\newblock In \emph{AAS/AIAA Astrodynamics Specialist Conference}, Snowbird, UT,
+  2018.
+\newblock AAS 18-244; NASA NTRS 20180006154.
+
+\bibitem[Junkins et~al.(1996)Junkins, Akella, and Alfriend]{junkins1996}
+John~L. Junkins, Maruthi~R. Akella, and Kyle~T. Alfriend.
+\newblock Non-{Gaussian} error propagation in orbital mechanics.
+\newblock \emph{The Journal of the Astronautical Sciences}, 44\penalty0
+  (4):\penalty0 541--563, 1996.
+
+\bibitem[{NASA}(2020)]{nasa2020handbook}
+{NASA}.
+\newblock {NASA} spacecraft conjunction assessment and collision avoidance best
+  practices handbook.
+\newblock Technical Report NASA/SP-20205011318, National Aeronautics and Space
+  Administration, 2020.
+
+\bibitem[{NASA Conjunction Assessment Risk Analysis (CARA)}(2026)]{caratools}
+{NASA Conjunction Assessment Risk Analysis (CARA)}.
+\newblock {CARA} analysis tools.
+\newblock \url{https://github.com/nasa/CARA_Analysis_Tools}, 2026.
+\newblock Test conjunctions and results at commit ce0f007
+  (DataFiles/PcTestCaseCDMs); accessed October 2026.
+
+\bibitem[Vallado(2013)]{vallado2013}
+David~A. Vallado.
+\newblock \emph{Fundamentals of Astrodynamics and Applications}.
+\newblock Microcosm Press, Hawthorne, CA, 4th edition, 2013.
+
+\end{thebibliography}

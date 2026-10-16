@@ -5,3 +5,7 @@ __pycache__/
 build/
 data/
 bench/.cara_cache/
+paper/*.aux
+paper/*.log
+paper/*.blg
+paper/*.out

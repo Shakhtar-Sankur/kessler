@@ -1,0 +1,198 @@
+[
+ {
+  "case": 1,
+  "hbr_m": 200.0,
+  "trials": 200000,
+  "restricted": 11848,
+  "full": 11848
+ },
+ {
+  "case": 2,
+  "hbr_m": 300.0,
+  "trials": 200000,
+  "restricted": 176335,
+  "full": 176335
+ },
+ {
+  "case": 3,
+  "hbr_m": 174.0,
+  "trials": 200000,
+  "restricted": 27760,
+  "full": 27760
+ },
+ {
+  "case": 4,
+  "hbr_m": 296.0,
+  "trials": 200000,
+  "restricted": 72426,
+  "full": 72426
+ },
+ {
+  "case": 6,
+  "hbr_m": 120.0,
+  "trials": 200000,
+  "restricted": 93242,
+  "full": 93242
+ },
+ {
+  "case": 7,
+  "hbr_m": 120.0,
+  "trials": 200000,
+  "restricted": 120783,
+  "full": 120783
+ },
+ {
+  "case": 8,
+  "hbr_m": 200.0,
+  "trials": 200000,
+  "restricted": 107988,
+  "full": 107988
+ },
+ {
+  "case": 9,
+  "hbr_m": 120.0,
+  "trials": 200000,
+  "restricted": 21855,
+  "full": 21855
+ },
+ {
+  "case": 12,
+  "hbr_m": 90.0,
+  "trials": 200000,
+  "restricted": 3939,
+  "full": 3939
+ },
+ {
+  "case": 14,
+  "hbr_m": 120.0,
+  "trials": 200000,
+  "restricted": 73689,
+  "full": 73689
+ },
+ {
+  "case": 15,
+  "hbr_m": 120.0,
+  "trials": 200000,
+  "restricted": 2682,
+  "full": 2682
+ },
+ {
+  "case": 17,
+  "hbr_m": 400.0,
+  "trials": 200000,
+  "restricted": 84720,
+  "full": 84720
+ },
+ {
+  "case": 22,
+  "hbr_m": 300.0,
+  "trials": 200000,
+  "restricted": 40445,
+  "full": 40445
+ },
+ {
+  "case": 23,
+  "hbr_m": 346.0,
+  "trials": 200000,
+  "restricted": 40207,
+  "full": 40207
+ },
+ {
+  "case": 24,
+  "hbr_m": 240.0,
+  "trials": 200000,
+  "restricted": 38264,
+  "full": 38264
+ },
+ {
+  "case": 25,
+  "hbr_m": 400.0,
+  "trials": 200000,
+  "restricted": 4426,
+  "full": 4426
+ },
+ {
+  "case": 27,
+  "hbr_m": 200.0,
+  "trials": 200000,
+  "restricted": 1473,
+  "full": 1473
+ },
+ {
+  "case": 28,
+  "hbr_m": 296.0,
+  "trials": 200000,
+  "restricted": 1455,
+  "full": 1455
+ },
+ {
+  "case": 29,
+  "hbr_m": 160.0,
+  "trials": 200000,
+  "restricted": 446,
+  "full": 446
+ },
+ {
+  "case": 30,
+  "hbr_m": 520.0,
+  "trials": 200000,
+  "restricted": 171,
+  "full": 171
+ },
+ {
+  "case": 35,
+  "hbr_m": 80.0,
+  "trials": 200000,
+  "restricted": 128,
+  "full": 128
+ },
+ {
+  "case": 36,
+  "hbr_m": 400.0,
+  "trials": 200000,
+  "restricted": 8,
+  "full": 8
+ },
+ {
+  "case": 37,
+  "hbr_m": 130.0,
+  "trials": 200000,
+  "restricted": 97,
+  "full": 97
+ },
+ {
+  "case": 47,
+  "hbr_m": 80.0,
+  "trials": 200000,
+  "restricted": 20,
+  "full": 20
+ },
+ {
+  "case": 49,
+  "hbr_m": 160.0,
+  "trials": 200000,
+  "restricted": 333,
+  "full": 333
+ },
+ {
+  "case": 51,
+  "hbr_m": 40.0,
+  "trials": 200000,
+  "restricted": 3862,
+  "full": 3862
+ },
+ {
+  "case": 52,
+  "hbr_m": 40.0,
+  "trials": 200000,
+  "restricted": 314,
+  "full": 314
+ },
+ {
+  "case": 53,
+  "hbr_m": 40.0,
+  "trials": 200000,
+  "restricted": 238,
+  "full": 238
+ }
+]
