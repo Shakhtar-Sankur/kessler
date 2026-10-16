@@ -8,7 +8,7 @@
 <meta name="author" content="Sankur Kundu">
 <meta property="og:type" content="website">
 <meta property="og:title" content="kessler: an independent audit of space traffic, every day">
-<meta property="og:description" content="Open-source GPU screening of the public satellite catalogue, live every day. SGP4 at 125.7 million states a second on a free T4; collision probabilities matching NASA CARA to 1.6e-8.">
+<meta property="og:description" content="Open-source GPU screening of the public satellite catalogue, live every day. SGP4 at 125.7 million states a second on a free T4; collision probabilities matching NASA CARA's on all 53 of its test conjunctions.">
 <meta property="og:url" content="https://shakhtar-sankur.github.io/kessler/">
 <meta property="og:image" content="https://shakhtar-sankur.github.io/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -193,7 +193,7 @@
     <div class="readouts" id="readouts">
       <div><b>125.7<em>M/s</em></b><span>Orbit states propagated per second on one free T4 GPU, 73× the reference library</span></div>
       <div><b>16.4<em>s</em></b><span>To screen 24 hours of every active satellite against every other on a T4; 177 s on 4 CPU cores</span></div>
-      <div><b>1.6<em>e-8</em></b><span>Largest relative difference from NASA CARA's collision probabilities, 53 real conjunctions</span></div>
+      <div><b>53<em>/53</em></b><span>NASA test conjunctions where its Monte Carlo agrees with NASA CARA's, 15–19× faster per core than NASA's library</span></div>
       <div><b>0<em> missed</em></b><span>Approaches missed against brute-force screening of every pair at every second</span></div>
     </div>
   </div>
@@ -266,7 +266,7 @@
       <div class="check"><span class="ag">vs Vallado reference SGP4</span><b>2.7e-12 km</b><span>Largest position difference on all 33 official verification cases, deep-space and decaying orbits included.</span></div>
       <div class="check"><span class="ag">vs the whole catalogue</span><b>7.1e-10 km</b><span>Every active object at six times from −1 to +7 days: 100,170 states, zero error-code mismatches.</span></div>
       <div class="check"><span class="ag">vs brute force</span><b>0 missed · 0 extra</b><span>47,080 approaches across four tests, every pair at every second, up to the whole catalogue with deep space.</span></div>
-      <div class="check"><span class="ag">vs NASA CARA</span><b>1.6e-8</b><span>Largest relative difference in collision probability over 106 values from 53 real conjunctions, at the precision of CARA's own quadrature.</span></div>
+      <div class="check"><span class="ag">vs NASA CARA</span><b>53 / 53</b><span>Conjunctions where the Monte Carlo agrees with CARA's own (χ² p = 0.67), including the 28 where the 2D method is wrong; the 2D method itself matches CARA's to 1.6e-8.</span></div>
     </div>
     <div class="held" style="margin-top:16px">
       <b>Withheld, on purpose</b>
@@ -283,7 +283,7 @@
     <ol class="contrib">
       <li><h3>Every pair, every day, in public</h3><p>A daily screening of the whole active catalogue, <b>including the Starlink–Starlink pairs</b> that CelesTrak's SOCRATES leaves out, published as a live globe and table.</p></li>
       <li><h3>GPU propagation and screening</h3><p>SGP4 at <b>125.7 million states a second</b> on a free GPU, and a grid-based all-vs-all screen proven against brute force, with GPU results identical to CPU.</p></li>
-      <li><h3>Collision probability to NASA's precision</h3><p>Foster's 2D probability in logarithms, reading standard Conjunction Data Messages, matching <b>NASA CARA to 1.6e-8</b> on 53 real conjunctions.</p></li>
+      <li><h3>Collision probability to NASA's standard</h3><p>Foster's 2D probability from standard Conjunction Data Messages, matching <b>NASA CARA to 1.6e-8</b>, and a Monte Carlo for the slow encounters where 2D fails, agreeing with CARA's on <b>all 53</b> test cases at <b>15–19×</b> the speed of NASA's library.</p></li>
       <li><h3>A maneuver audit method</h3><p>Maneuver detection from public orbit histories, tested on debris that cannot maneuver, built to compare with operators' reports to the FCC once publication is approved.</p></li>
     </ol>
     <div class="proof">
@@ -305,7 +305,7 @@
         <li id="fact-live1">The latest daily screening is loading…</li>
         <li id="fact-live2"></li>
         <li>An open-source program screens <b>every active satellite against every other for a full day in 16.4 seconds</b> on a free cloud GPU.</li>
-        <li>Its collision probabilities match <b>NASA's own tool to within 1.6 parts in 100 million</b> on 53 real conjunctions.</li>
+        <li>Its collision probabilities agree with <b>NASA's own Monte Carlo on all 53</b> of NASA's test conjunctions, and it computes them <b>15–19 times faster</b> than NASA's library.</li>
       </ul>
       <div class="kit">
         <h3>Contact</h3>
