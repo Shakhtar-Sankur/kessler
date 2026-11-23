@@ -1,0 +1,828 @@
+{
+ "summary": {
+  "date": "2026-11-23",
+  "start": "2026-11-23T16:27:00Z",
+  "source": "CelesTrak active satellites",
+  "hours": 24.0,
+  "dmax_km": 5.0,
+  "objects": 16904,
+  "objects_by_kind": {
+   "starlink": 11199,
+   "payload": 5705,
+   "rocket body": 0,
+   "debris": 0,
+   "unknown": 0
+  },
+  "approaches": 49380,
+  "below_1km": 1826,
+  "below_200m": 72,
+  "starlink_starlink": 36887,
+  "starlink_other": 10085,
+  "neither_starlink": 2408,
+  "docked_or_colocated_pairs": 96,
+  "gpu": false,
+  "seconds": 101.2
+ },
+ "closest": [
+  {
+   "a": {
+    "name": "STARLINK-35590",
+    "norad": 66108,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-35455",
+    "norad": 66152,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T08:23:36Z",
+   "miss_m": 5.9,
+   "vrel_km_s": 4.4,
+   "worst_case_pc_10m": 1.0
+  },
+  {
+   "a": {
+    "name": "QIANFAN-116",
+    "norad": 68643,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-181",
+    "norad": 69398,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T02:10:12Z",
+   "miss_m": 36.7,
+   "vrel_km_s": 5.119,
+   "worst_case_pc_10m": 0.06669306813009071
+  },
+  {
+   "a": {
+    "name": "QIANFAN-116",
+    "norad": 68643,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-181",
+    "norad": 69398,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T01:16:53Z",
+   "miss_m": 47.1,
+   "vrel_km_s": 5.107,
+   "worst_case_pc_10m": 0.006987614573495671
+  },
+  {
+   "a": {
+    "name": "STARLINK-36830",
+    "norad": 68110,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37266",
+    "norad": 68780,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T07:57:46Z",
+   "miss_m": 54.8,
+   "vrel_km_s": 9.355,
+   "worst_case_pc_10m": 0.005112541638511974
+  },
+  {
+   "a": {
+    "name": "STARLINK-30427",
+    "norad": 57865,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-36133",
+    "norad": 66963,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T10:17:19Z",
+   "miss_m": 59.7,
+   "vrel_km_s": 7.873,
+   "worst_case_pc_10m": 0.006352360908614288
+  },
+  {
+   "a": {
+    "name": "STARLINK-4624",
+    "norad": 53684,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34631",
+    "norad": 64855,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T11:31:01Z",
+   "miss_m": 64.0,
+   "vrel_km_s": 2.946,
+   "worst_case_pc_10m": 0.009810695072342182
+  },
+  {
+   "a": {
+    "name": "STARLINK-34808",
+    "norad": 65745,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37640",
+    "norad": 69447,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T09:36:06Z",
+   "miss_m": 69.3,
+   "vrel_km_s": 2.12,
+   "worst_case_pc_10m": 0.0036998974772240643
+  },
+  {
+   "a": {
+    "name": "STARLINK-32426",
+    "norad": 61681,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-35161",
+    "norad": 65936,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T09:18:13Z",
+   "miss_m": 71.5,
+   "vrel_km_s": 7.178,
+   "worst_case_pc_10m": 0.00296460645702207
+  },
+  {
+   "a": {
+    "name": "STARLINK-2418",
+    "norad": 48097,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "JINJUSAT-1B",
+    "norad": 63210,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T23:47:35Z",
+   "miss_m": 79.7,
+   "vrel_km_s": 14.58,
+   "worst_case_pc_10m": 0.006707469669403285
+  },
+  {
+   "a": {
+    "name": "STARLINK-31490",
+    "norad": 59222,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37944",
+    "norad": 100284,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T07:01:15Z",
+   "miss_m": 87.8,
+   "vrel_km_s": 7.18,
+   "worst_case_pc_10m": 0.0021479333695823472
+  },
+  {
+   "a": {
+    "name": "STARLINK-2355",
+    "norad": 47895,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-4577",
+    "norad": 53564,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T08:40:26Z",
+   "miss_m": 90.3,
+   "vrel_km_s": 12.063,
+   "worst_case_pc_10m": 0.0033904514727264726
+  },
+  {
+   "a": {
+    "name": "STARLINK-34383",
+    "norad": 64305,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "DUTHSAT-2",
+    "norad": 64530,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T12:28:46Z",
+   "miss_m": 94.2,
+   "vrel_km_s": 15.022,
+   "worst_case_pc_10m": 0.004293356963961291
+  },
+  {
+   "a": {
+    "name": "STARLINK-32013",
+    "norad": 60103,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37510",
+    "norad": 69520,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T10:07:01Z",
+   "miss_m": 94.7,
+   "vrel_km_s": 2.089,
+   "worst_case_pc_10m": 0.002886493069568032
+  },
+  {
+   "a": {
+    "name": "STARLINK-31320",
+    "norad": 58886,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37343",
+    "norad": 69159,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T01:51:44Z",
+   "miss_m": 97.2,
+   "vrel_km_s": 6.786,
+   "worst_case_pc_10m": 0.0020535955307104396
+  },
+  {
+   "a": {
+    "name": "FLOCK 4G-8",
+    "norad": 62613,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "STARLINK-37568",
+    "norad": 69492,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T11:22:35Z",
+   "miss_m": 100.9,
+   "vrel_km_s": 7.756,
+   "worst_case_pc_10m": 0.0016002153385611428
+  },
+  {
+   "a": {
+    "name": "QIANFAN-115",
+    "norad": 68642,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-175",
+    "norad": 69392,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T01:34:31Z",
+   "miss_m": 104.8,
+   "vrel_km_s": 5.096,
+   "worst_case_pc_10m": 0.0017072685015503057
+  },
+  {
+   "a": {
+    "name": "STARLINK-3202",
+    "norad": 49742,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-35403",
+    "norad": 66081,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T07:34:43Z",
+   "miss_m": 106.1,
+   "vrel_km_s": 7.698,
+   "worst_case_pc_10m": 0.004513892489345753
+  },
+  {
+   "a": {
+    "name": "STARLINK-35352",
+    "norad": 66177,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37071",
+    "norad": 68190,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T07:50:01Z",
+   "miss_m": 111.3,
+   "vrel_km_s": 2.129,
+   "worst_case_pc_10m": 0.0030681462293572727
+  },
+  {
+   "a": {
+    "name": "STARLINK-31323",
+    "norad": 58882,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34412",
+    "norad": 66132,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T15:13:59Z",
+   "miss_m": 120.3,
+   "vrel_km_s": 7.68,
+   "worst_case_pc_10m": 0.0009664572329928545
+  },
+  {
+   "a": {
+    "name": "CELESTIS-17 & SHERPA-FX1",
+    "norad": 47486,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "STARLINK-37166",
+    "norad": 69195,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T15:49:05Z",
+   "miss_m": 121.9,
+   "vrel_km_s": 14.622,
+   "worst_case_pc_10m": 0.0028713400052836203
+  },
+  {
+   "a": {
+    "name": "STARLINK-30393",
+    "norad": 57866,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-36892",
+    "norad": 67944,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T15:09:35Z",
+   "miss_m": 124.1,
+   "vrel_km_s": 7.636,
+   "worst_case_pc_10m": 0.0010569824920464107
+  },
+  {
+   "a": {
+    "name": "STARLINK-31923",
+    "norad": 60600,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37632",
+    "norad": 69374,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T15:44:09Z",
+   "miss_m": 125.3,
+   "vrel_km_s": 2.164,
+   "worst_case_pc_10m": 0.0036549095494832207
+  },
+  {
+   "a": {
+    "name": "STARLINK-31239",
+    "norad": 60093,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37490",
+    "norad": 69525,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-23T20:19:29Z",
+   "miss_m": 126.9,
+   "vrel_km_s": 2.09,
+   "worst_case_pc_10m": 0.000970024802977043
+  },
+  {
+   "a": {
+    "name": "STARLINK-32723",
+    "norad": 62449,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-33643",
+    "norad": 63381,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T03:20:44Z",
+   "miss_m": 127.4,
+   "vrel_km_s": 7.686,
+   "worst_case_pc_10m": 0.0023584308725733264
+  },
+  {
+   "a": {
+    "name": "LPNTSAT-002 (IOD-2)",
+    "norad": 68409,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "ERMINAZ-2U (AO-129)",
+    "norad": 101098,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T14:28:02Z",
+   "miss_m": 136.2,
+   "vrel_km_s": 14.992,
+   "worst_case_pc_10m": 0.0021816345301284984
+  },
+  {
+   "a": {
+    "name": "STARLINK-31591",
+    "norad": 59207,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37741",
+    "norad": 100297,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T02:10:27Z",
+   "miss_m": 138.2,
+   "vrel_km_s": 6.872,
+   "worst_case_pc_10m": 0.0014351155686977964
+  },
+  {
+   "a": {
+    "name": "QIANFAN-116",
+    "norad": 68643,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-181",
+    "norad": 69398,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T00:23:33Z",
+   "miss_m": 138.8,
+   "vrel_km_s": 5.119,
+   "worst_case_pc_10m": 0.005344758149058246
+  },
+  {
+   "a": {
+    "name": "STARLINK-34991",
+    "norad": 65446,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "UMBRA-11",
+    "norad": 66748,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T19:22:42Z",
+   "miss_m": 140.2,
+   "vrel_km_s": 13.962,
+   "worst_case_pc_10m": 0.0013024975205930323
+  },
+  {
+   "a": {
+    "name": "STARLINK-30875",
+    "norad": 58224,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "LIZZIESAT-1 (LS-1)",
+    "norad": 59132,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T19:35:45Z",
+   "miss_m": 148.9,
+   "vrel_km_s": 9.66,
+   "worst_case_pc_10m": 0.0010649766198492822
+  },
+  {
+   "a": {
+    "name": "STARLINK-4564",
+    "norad": 53560,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34564",
+    "norad": 64852,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T00:48:22Z",
+   "miss_m": 149.2,
+   "vrel_km_s": 13.673,
+   "worst_case_pc_10m": 0.0012922891862648524
+  },
+  {
+   "a": {
+    "name": "STARLINK-30083",
+    "norad": 56295,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-30351",
+    "norad": 57738,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T03:00:16Z",
+   "miss_m": 154.1,
+   "vrel_km_s": 1.041,
+   "worst_case_pc_10m": 0.0031148120564364157
+  },
+  {
+   "a": {
+    "name": "STARLINK-30085",
+    "norad": 56709,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34118",
+    "norad": 63900,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T16:15:05Z",
+   "miss_m": 154.4,
+   "vrel_km_s": 7.634,
+   "worst_case_pc_10m": 0.003958615366202747
+  },
+  {
+   "a": {
+    "name": "STARLINK-4621",
+    "norad": 53676,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34748",
+    "norad": 64848,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T07:40:02Z",
+   "miss_m": 156.3,
+   "vrel_km_s": 2.934,
+   "worst_case_pc_10m": 0.004370547030928687
+  },
+  {
+   "a": {
+    "name": "STARLINK-35641",
+    "norad": 66167,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37408",
+    "norad": 69518,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T13:19:33Z",
+   "miss_m": 156.7,
+   "vrel_km_s": 0.428,
+   "worst_case_pc_10m": 0.0007013362023362827
+  },
+  {
+   "a": {
+    "name": "STARLINK-32304",
+    "norad": 60738,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-36345",
+    "norad": 68243,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T09:18:41Z",
+   "miss_m": 160.2,
+   "vrel_km_s": 2.118,
+   "worst_case_pc_10m": 0.0006119573470321141
+  },
+  {
+   "a": {
+    "name": "QIANFAN-116",
+    "norad": 68643,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-181",
+    "norad": 69398,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T23:30:14Z",
+   "miss_m": 161.3,
+   "vrel_km_s": 5.107,
+   "worst_case_pc_10m": 0.00268822581686741
+  },
+  {
+   "a": {
+    "name": "STARLINK-5054",
+    "norad": 53906,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37828",
+    "norad": 100495,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-23T16:59:14Z",
+   "miss_m": 161.8,
+   "vrel_km_s": 7.69,
+   "worst_case_pc_10m": 0.001198125996359371
+  },
+  {
+   "a": {
+    "name": "STARLINK-34272",
+    "norad": 64274,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37917",
+    "norad": 100034,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-23T17:24:15Z",
+   "miss_m": 162.9,
+   "vrel_km_s": 6.837,
+   "worst_case_pc_10m": 0.000513848829778885
+  },
+  {
+   "a": {
+    "name": "QIANFAN-115",
+    "norad": 68642,
+    "kind": "payload"
+   },
+   "b": {
+    "name": "QIANFAN-175",
+    "norad": 69392,
+    "kind": "payload"
+   },
+   "tca": "2026-11-24T09:34:27Z",
+   "miss_m": 163.4,
+   "vrel_km_s": 5.108,
+   "worst_case_pc_10m": 0.0006170096625644352
+  },
+  {
+   "a": {
+    "name": "STARLINK-4634",
+    "norad": 53967,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "LONGJIANG 3",
+    "norad": 56874,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T18:27:23Z",
+   "miss_m": 164.2,
+   "vrel_km_s": 11.869,
+   "worst_case_pc_10m": 0.0007143598692787173
+  },
+  {
+   "a": {
+    "name": "STARLINK-4000",
+    "norad": 52605,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34857",
+    "norad": 65102,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T09:53:48Z",
+   "miss_m": 164.3,
+   "vrel_km_s": 7.739,
+   "worst_case_pc_10m": 0.0033585878544332803
+  },
+  {
+   "a": {
+    "name": "STARLINK-31498",
+    "norad": 59189,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-33927",
+    "norad": 64001,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-23T20:41:35Z",
+   "miss_m": 169.3,
+   "vrel_km_s": 7.638,
+   "worst_case_pc_10m": 0.0022347479506343495
+  },
+  {
+   "a": {
+    "name": "STARLINK-4285",
+    "norad": 52991,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-37248",
+    "norad": 68527,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T06:25:46Z",
+   "miss_m": 171.0,
+   "vrel_km_s": 0.366,
+   "worst_case_pc_10m": 0.0004221637547356703
+  },
+  {
+   "a": {
+    "name": "STARLINK-35314",
+    "norad": 65837,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-35385",
+    "norad": 65906,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T16:25:32Z",
+   "miss_m": 171.7,
+   "vrel_km_s": 7.662,
+   "worst_case_pc_10m": 0.0007144503667199521
+  },
+  {
+   "a": {
+    "name": "STARLINK-3452",
+    "norad": 51744,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-32583",
+    "norad": 61955,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-23T23:52:21Z",
+   "miss_m": 172.8,
+   "vrel_km_s": 11.995,
+   "worst_case_pc_10m": 0.0006239690491365193
+  },
+  {
+   "a": {
+    "name": "STARLINK-36879",
+    "norad": 67982,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-38019",
+    "norad": 69762,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T15:43:54Z",
+   "miss_m": 174.2,
+   "vrel_km_s": 15.018,
+   "worst_case_pc_10m": 0.0012122310258539193
+  },
+  {
+   "a": {
+    "name": "STARLINK-30940",
+    "norad": 58409,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-36473",
+    "norad": 67325,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T11:18:33Z",
+   "miss_m": 174.2,
+   "vrel_km_s": 5.013,
+   "worst_case_pc_10m": 0.0025347954814247415
+  },
+  {
+   "a": {
+    "name": "STARLINK-37306",
+    "norad": 68680,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-38178",
+    "norad": 100201,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T11:51:14Z",
+   "miss_m": 174.6,
+   "vrel_km_s": 3.563,
+   "worst_case_pc_10m": 0.0005314763981657442
+  },
+  {
+   "a": {
+    "name": "STARLINK-4395",
+    "norad": 53199,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "STARLINK-34151",
+    "norad": 64120,
+    "kind": "starlink"
+   },
+   "tca": "2026-11-24T09:08:14Z",
+   "miss_m": 175.1,
+   "vrel_km_s": 13.363,
+   "worst_case_pc_10m": 0.0008149177604063291
+  },
+  {
+   "a": {
+    "name": "STARLINK-34356",
+    "norad": 64303,
+    "kind": "starlink"
+   },
+   "b": {
+    "name": "COSMOS 2604",
+    "norad": 67678,
+    "kind": "payload"
+   },
+   "tca": "2026-11-23T19:27:59Z",
+   "miss_m": 178.3,
+   "vrel_km_s": 13.236,
+   "worst_case_pc_10m": 0.00197399930770462
+  }
+ ]
+}
